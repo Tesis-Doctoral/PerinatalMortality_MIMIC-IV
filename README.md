@@ -36,7 +36,9 @@ PerinatalMortality_MIMIC-IV.code-workspace
 
 ## SQL scripts
 
-These four migrated scripts still build on the old maternal table `cohort_smm_dataset`; the analysis plan (section 6) replaces them with scripts on the revised cohort. Their order, if you run them as they are, each as a whole script in one connection (DBeaver: Alt+X), after building the prerequisite tables of the maternal project:
+**Count audit (new, plan task T08, not yet run).** `sql/02_audit_counts/audit_counts.sql` (Spanish: `audit_counts_es.sql`) works on the revised tables of the maternal project (`cohort_obstetric_v2`, `hadm_delivery_v2`, `obstetric_dx_v2`, `predictors_24h_v2`). It is read-only (temporary tables and SELECTs, aggregate output) and covers groups A–D of the plan: base counts, events and definition, patient overlap and same pregnancy, era and coding. Run it as one whole script in one connection (DBeaver: Alt+X); every result set starts with a column `q` that matches the identifier in the sheet *Conteos* of the tracking workbook. The label is provisional (the 13 legacy code patterns) until the verified code table of task T15; Q-C5 is computed in the notebook of task T13; groups E and F are separate scripts.
+
+The four migrated scripts below still build on the old maternal table `cohort_smm_dataset`; the analysis plan (section 6) replaces them with scripts on the revised cohort. Their order, if you run them as they are, each as a whole script in one connection (DBeaver: Alt+X), after building the prerequisite tables of the maternal project:
 
 | Order | Script | What it does |
 |---|---|---|

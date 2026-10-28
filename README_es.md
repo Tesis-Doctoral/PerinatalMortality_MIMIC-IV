@@ -36,7 +36,9 @@ PerinatalMortality_MIMIC-IV.code-workspace
 
 ## Scripts SQL
 
-Estos cuatro scripts migrados todavía parten de la tabla materna antigua `cohort_smm_dataset`; el plan de análisis (sección 6) los reemplaza por scripts sobre la cohorte revisada. Su orden, si los ejecutas tal como están, cada uno como script completo en una sola conexión (DBeaver: Alt+X), después de construir las tablas previas del proyecto materno:
+**Auditoría de conteos (nuevo, tarea T08 del plan, aún sin ejecutar).** `sql/02_audit_counts/audit_counts.sql` (versión en español: `audit_counts_es.sql`) trabaja sobre las tablas revisadas del proyecto materno (`cohort_obstetric_v2`, `hadm_delivery_v2`, `obstetric_dx_v2`, `predictors_24h_v2`). Es de solo lectura (tablas temporales y SELECT, salida agregada) y cubre los grupos A–D del plan: conteos base, eventos y definición, solapamiento de pacientes y mismo embarazo, época y codificación. Se ejecuta como un solo script completo en una conexión (DBeaver: Alt+X); cada resultado empieza con una columna `q` que coincide con el identificador de la hoja *Conteos* del Excel de seguimiento. La etiqueta es provisional (los 13 patrones de código heredados) hasta la tabla verificada de códigos de la tarea T15; Q-C5 se calcula en el notebook de la tarea T13; los grupos E y F son scripts aparte.
+
+Los cuatro scripts migrados de abajo todavía parten de la tabla materna antigua `cohort_smm_dataset`; el plan de análisis (sección 6) los reemplaza por scripts sobre la cohorte revisada. Su orden, si los ejecutas tal como están, cada uno como script completo en una sola conexión (DBeaver: Alt+X), después de construir las tablas previas del proyecto materno:
 
 | Orden | Script | Qué hace |
 |---|---|---|

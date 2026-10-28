@@ -98,7 +98,7 @@ Recommendations are mine; they are proposals until you record them in the workbo
 
 The current `01_fetal_death_models.ipynb` is renamed `00_exploratory_fetal_death_models.ipynb` once the new notebooks exist.
 
-**SQL scripts (proposed, each with its `_es` version).** `sql/01_labels/` (verified code table; label and unit columns), `sql/02_audit_counts/` (groups A–F), `sql/03_predictors/` (window, blocks, dictionary, missingness). The four migrated scripts stay in `sql/` until replaced: the feasibility script is superseded by the audit, the dataset and feature scripts are rebuilt on the revised cohort, and the feature-discovery script stays as exploratory evidence.
+**SQL scripts (proposed, each with its `_es` version).** `sql/01_labels/` (verified code table; label and unit columns), `sql/02_audit_counts/` (groups A–F; `audit_counts.sql` with groups A–D is written and verified, not yet run, task T08; E and F are separate scripts), `sql/03_predictors/` (window, blocks, dictionary, missingness). The four migrated scripts stay in `sql/` until replaced: the feasibility script is superseded by the audit, the dataset and feature scripts are rebuilt on the revised cohort, and the feature-discovery script stays as exploratory evidence.
 
 ## 7. Sensitivity analyses
 

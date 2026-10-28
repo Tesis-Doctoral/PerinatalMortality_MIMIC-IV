@@ -98,7 +98,7 @@ Las recomendaciones son mías; son propuestas hasta que las registres en el Exce
 
 El `01_fetal_death_models.ipynb` actual se renombra `00_exploratory_fetal_death_models.ipynb` cuando existan los notebooks nuevos.
 
-**Scripts SQL (propuestos, cada uno con su versión `_es`).** `sql/01_labels/` (tabla verificada de códigos; columnas de etiqueta y unidad), `sql/02_audit_counts/` (grupos A–F), `sql/03_predictors/` (ventana, bloques, diccionario, faltantes). Los cuatro scripts migrados permanecen en `sql/` hasta reemplazarse: el de factibilidad lo reemplaza la auditoría, los de conjunto de datos y variables se reconstruyen sobre la cohorte revisada, y el de descubrimiento de variables queda como evidencia exploratoria.
+**Scripts SQL (propuestos, cada uno con su versión `_es`).** `sql/01_labels/` (tabla verificada de códigos; columnas de etiqueta y unidad), `sql/02_audit_counts/` (grupos A–F; `audit_counts.sql` con los grupos A–D está escrito y verificado, aún sin ejecutar, tarea T08; E y F son scripts aparte), `sql/03_predictors/` (ventana, bloques, diccionario, faltantes). Los cuatro scripts migrados permanecen en `sql/` hasta reemplazarse: el de factibilidad lo reemplaza la auditoría, los de conjunto de datos y variables se reconstruyen sobre la cohorte revisada, y el de descubrimiento de variables queda como evidencia exploratoria.
 
 ## 7. Análisis de sensibilidad
 
