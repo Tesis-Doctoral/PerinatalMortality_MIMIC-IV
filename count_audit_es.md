@@ -1,4 +1,4 @@
-# Auditoría de conteos — modelos de muerte fetal, MIMIC-IV
+# Auditoría de conteos — modelos de muerte perinatal antes del nacimiento (muerte fetal), MIMIC-IV
 
 Documento vivo. Primera versión escrita el 28/10/2026, después de ejecutar los grupos A–E y de verificar el catálogo de códigos. Reporta qué midió la auditoría, qué resolvió cada resultado y qué sigue abierto. El plan está en [`analysis_plan_es.md`](analysis_plan_es.md) (la sección 4 lista cada conteo), las cifras por conteo están en la hoja *Conteos* del libro de seguimiento `docs/Plan_Muerte_Fetal_MIMIC-IV.xlsx` (archivo local, sin versionar) y la versión en inglés de este documento es [`count_audit.md`](count_audit.md).
 
@@ -8,7 +8,7 @@ Documento vivo. Primera versión escrita el 28/10/2026, después de ejecutar los
 
 La auditoría mide, antes de construir cualquier modelo, los números que deciden el diseño: qué admisiones forman la población, cuál es la unidad de análisis, cómo se define el desenlace, cuándo se predice y cuántos eventos quedan. Sigue el proyecto materno: **sin solapamiento y sin selección por desenlace**. Cada regla de la cohorte se mide primero como columna y solo después se aplica, de modo que cada elección se toma con números y se reporta junto con su análisis de sensibilidad.
 
-El desenlace es un **sustituto**: un código diagnóstico de muerte fetal en la admisión de la madre. MIMIC-IV no tiene revisión de historias clínicas ni vínculo madre–recién nacido, así que no captura las muertes neonatales tempranas y todo documento dice *muerte fetal*, no *muerte perinatal*.
+El desenlace es un **sustituto**: un código diagnóstico de muerte fetal en la admisión de la madre. MIMIC-IV no tiene revisión de historias clínicas ni vínculo madre–recién nacido, así que no captura las muertes neonatales tempranas. El desenlace se nombra **muerte perinatal antes del nacimiento** (la parte anteparto de la muerte perinatal, es decir, la muerte fetal o mortinato), siempre señalada como sustituto (decisión D2). El período perinatal empieza a las 22 semanas completas en la CIE-10, por eso el análisis de sensibilidad de 22 semanas importa para los eventos de menos de 22 semanas.
 
 ## 2. Datos y scripts
 
@@ -112,7 +112,7 @@ Por grupo de año ancla: 2008–10 5.23 · 2011–13 6.69 · 2014–16 6.43 · 2
 
 **Semanas de gestación (Q-D2).** Disponibles en 83 de 86 eventos CIE-10 y 8,844 de 8,883 partos CIE-10; en ningún evento ni parto CIE-9. En total 8,844 de 19,425 partos (45.5 %) tienen semanas, todos de la época CIE-10.
 
-**Plausibilidad (Q-D3).** Por 1,000 hospitalizaciones de parto: A, solo código de mortinato 109 / 19,425 = 5.61; B, estricto 114 = 5.87; C, estricto o parcial 127 = 6.54; D, solo CIE-10, estricto y 28 semanas o más, 36 / 8,883 = 4.05. Referencia nacional (NCHS, por 1,000 nacidos vivos más muertes fetales): 20 semanas o más 5.48 (2022) y 5.44 (2024); 28 semanas o más 2.71 (2022) y 2.57 (2024). Las tasas a cualquier edad gestacional están cerca de la cifra nacional; la de 28 semanas la supera (4.05 frente a 2.57), lo que puede reflejar una población de referencia (no se probó). Los denominadores difieren (partos hospitalarios, no todos los nacimientos), así que la comparación es una verificación de plausibilidad, no una validación.
+**Plausibilidad (Q-D3).** Por 1,000 hospitalizaciones de parto: A, solo código de mortinato 109 / 19,425 = 5.61; B, estricto 114 = 5.87; C, estricto o parcial 127 = 6.54; D, solo CIE-10, estricto y 28 semanas o más, 36 / 8,883 = 4.05. Referencia nacional (NCHS, por 1,000 nacidos vivos más muertes fetales): 20 semanas o más 5.48 (2022) y 5.44 (2024); 28 semanas o más 2.71 (2022) y 2.57 (2024) (Gregory et al. 2024, 2026; sección 6). Las tasas a cualquier edad gestacional están cerca de la cifra nacional; la de 28 semanas la supera (4.05 frente a 2.57), lo que puede reflejar una población de referencia (no se probó). Los denominadores difieren (partos hospitalarios, no todos los nacimientos), así que la comparación es una verificación de plausibilidad, no una validación.
 
 ### 3.5 Grupo E — elegibilidad y tiempo
 
@@ -189,7 +189,8 @@ Decisiones abiertas: D2 (nombre del desenlace) y D9–D14 (bloques de predictore
 
 ## 6. Fuentes
 
-- NCHS, National Vital Statistics Reports, vol. 73, n.º 9 (datos de 2022) y vol. 75, n.º 6 (datos de 2024): tasas de mortalidad fetal de EE. UU. a 20 semanas o más y a 28 semanas o más. Completar la cita y la URL desde la hoja *Conteos* (Q-D3).
+- Gregory ECW, Valenzuela CP, Hoyert DL. Fetal mortality: United States, 2022. National Vital Statistics Reports, vol. 73, n.º 9. Hyattsville, MD: National Center for Health Statistics; 12 de septiembre de 2024. https://www.cdc.gov/nchs/data/nvsr/nvsr73/nvsr73-09.pdf (20 semanas o más: 5.48; 28 semanas o más: 2.71, por 1,000 nacidos vivos y muertes fetales).
+- Gregory ECW, Valenzuela CP, Hoyert DL. Fetal mortality: United States, 2024. National Vital Statistics Reports, vol. 75, n.º 6. Hyattsville, MD: National Center for Health Statistics; 10 de septiembre de 2026. https://www.cdc.gov/nchs/data/nvsr/nvsr75/nvsr75-06.pdf (20 semanas o más: 5.44, 5.98 en 2014; 28 semanas o más: 2.57, 2.83 en 2014). Ambos informes cuentan las muertes fetales desde las 20 semanas (tempranas 20–27 semanas, tardías 28 semanas o más) y excluyen las interrupciones inducidas; cotejado con los PDF el 28/10/2026.
 - OMS CIE-10 (navegador 2019): O36.4, Z37, P95 (capturas aportadas por el autor el 28/10/2026).
 - CIE-10-CM (AAPC, Kodex, findacode.com) y CIE-9-CM (icd9data.com): títulos de códigos y términos de inclusión, como se listan en el encabezado de `sql/01_labels/01_fetal_death_codes_official.sql`.
 - Umbrales de mortinato: OMS y CIE-11, 22 semanas; NCHS, 20 semanas.

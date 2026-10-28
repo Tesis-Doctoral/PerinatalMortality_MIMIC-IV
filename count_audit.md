@@ -1,4 +1,4 @@
-# Count audit — fetal-death models, MIMIC-IV
+# Count audit — models of perinatal death before birth (fetal death), MIMIC-IV
 
 Living document. First version written on 2026-10-28, after running groups A–E and verifying the code catalogue. It reports what the audit measured, what each result settled and what is still open. The plan is in [`analysis_plan.md`](analysis_plan.md) (section 4 lists every count), the per-count figures are in the sheet *Conteos* of the tracking workbook `docs/Plan_Muerte_Fetal_MIMIC-IV.xlsx` (local file, not versioned) and the Spanish version of this document is [`count_audit_es.md`](count_audit_es.md).
 
@@ -8,7 +8,7 @@ Living document. First version written on 2026-10-28, after running groups A–E
 
 The audit measures, before any model is built, the numbers that decide the design: which admissions form the population, what the unit of analysis is, how the outcome is defined, when the prediction is made and how many events remain. It follows the maternal project: **no overlap and no selection by outcome**. Each cohort rule is first measured as a column and only then applied, so that every choice is made with numbers and reported together with its sensitivity analysis.
 
-The outcome is a **proxy**: a fetal-death diagnosis code on the maternal admission. MIMIC-IV has no chart review and no mother–newborn linkage, so early neonatal deaths are not captured and every document says *fetal death*, not *perinatal death*.
+The outcome is a **proxy**: a fetal-death diagnosis code on the maternal admission. MIMIC-IV has no chart review and no mother–newborn linkage, so early neonatal deaths are not captured. The outcome is named **perinatal death before birth** (the antenatal part of perinatal death, that is, fetal death or stillbirth), always labelled as a proxy (decision D2). The perinatal period starts at 22 completed weeks in ICD-10, which is why the 22-week sensitivity analysis matters for the events under 22 weeks.
 
 ## 2. Data and scripts
 
@@ -112,7 +112,7 @@ By anchor-year group: 2008–10 5.23 · 2011–13 6.69 · 2014–16 6.43 · 2017
 
 **Gestational weeks (Q-D2).** Available in 83 of 86 ICD-10 events and 8,844 of 8,883 ICD-10 deliveries; in none of the ICD-9 events or deliveries. In total 8,844 of 19,425 deliveries (45.5%) have weeks, all from the ICD-10 era.
 
-**Plausibility (Q-D3).** Per 1,000 delivery hospitalizations: A, stillbirth code only 109 / 19,425 = 5.61; B, strict 114 = 5.87; C, strict or partial 127 = 6.54; D, ICD-10 only, strict and 28 weeks or more, 36 / 8,883 = 4.05. National reference (NCHS, per 1,000 live births plus fetal deaths): 20 weeks or more 5.48 (2022) and 5.44 (2024); 28 weeks or more 2.71 (2022) and 2.57 (2024). The rates at any gestational age are close to the national figure; the 28-week rate is above it (4.05 against 2.57), which may reflect a referral population (not tested). The denominators differ (hospital deliveries, not all births), so the comparison is a plausibility check, not a validation.
+**Plausibility (Q-D3).** Per 1,000 delivery hospitalizations: A, stillbirth code only 109 / 19,425 = 5.61; B, strict 114 = 5.87; C, strict or partial 127 = 6.54; D, ICD-10 only, strict and 28 weeks or more, 36 / 8,883 = 4.05. National reference (NCHS, per 1,000 live births plus fetal deaths): 20 weeks or more 5.48 (2022) and 5.44 (2024); 28 weeks or more 2.71 (2022) and 2.57 (2024) (Gregory et al. 2024, 2026; section 6). The rates at any gestational age are close to the national figure; the 28-week rate is above it (4.05 against 2.57), which may reflect a referral population (not tested). The denominators differ (hospital deliveries, not all births), so the comparison is a plausibility check, not a validation.
 
 ### 3.5 Group E — eligibility and timing
 
@@ -189,7 +189,8 @@ Open decisions: D2 (outcome name) and D9–D14 (predictor blocks, coverage rule,
 
 ## 6. Sources
 
-- NCHS, National Vital Statistics Reports, vol. 73, no. 9 (2022 data) and vol. 75, no. 6 (2024 data): US fetal mortality rates at 20 weeks or more and at 28 weeks or more. Complete the full citation and URL from the sheet *Conteos* (Q-D3).
+- Gregory ECW, Valenzuela CP, Hoyert DL. Fetal mortality: United States, 2022. National Vital Statistics Reports, vol. 73, no. 9. Hyattsville, MD: National Center for Health Statistics; September 12, 2024. https://www.cdc.gov/nchs/data/nvsr/nvsr73/nvsr73-09.pdf (20 weeks or more: 5.48; 28 weeks or more: 2.71, per 1,000 live births and fetal deaths).
+- Gregory ECW, Valenzuela CP, Hoyert DL. Fetal mortality: United States, 2024. National Vital Statistics Reports, vol. 75, no. 6. Hyattsville, MD: National Center for Health Statistics; September 10, 2026. https://www.cdc.gov/nchs/data/nvsr/nvsr75/nvsr75-06.pdf (20 weeks or more: 5.44, 5.98 in 2014; 28 weeks or more: 2.57, 2.83 in 2014). Both reports count fetal deaths at 20 weeks or more (early 20–27 weeks, late 28 weeks or more) and exclude induced terminations; checked against the PDFs on 2026-10-28.
 - WHO ICD-10 (2019 browser): O36.4, Z37, P95 (screenshots supplied by the author on 2026-10-28).
 - ICD-10-CM (AAPC, Kodex, findacode.com) and ICD-9-CM (icd9data.com): code titles and inclusion terms, as listed in the header of `sql/01_labels/01_fetal_death_codes_official.sql`.
 - Stillbirth thresholds: WHO and ICD-11, 22 weeks; NCHS, 20 weeks.
