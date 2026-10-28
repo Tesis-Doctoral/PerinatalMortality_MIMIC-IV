@@ -59,6 +59,17 @@ Read-only, aggregate output only; never publish rows with `subject_id` or `hadm_
 
 Legacy values to re-verify (they disagree with each other in one case): 154 events (136 strict only); 2 events with severe maternal morbidity and 0 maternal deaths among strict events; admissions after an earlier fetal-death admission (17, of them 5 events) are described as **under 90 days** in `fetal_death_features.sql` and as **within 180 days** in the notebook; prior fetal death at least 365 days earlier, 1 event in 78 admissions.
 
+### Results of the count audit, groups A–D (run 2026-10-28)
+
+Full figures are in the sheet *Conteos* of the tracking workbook. The provisional label reproduces the legacy dataset exactly (154 events, 136 strict, 0 discordant admissions) and the base counts match the maternal audit (25,736 admissions, 15,084 patients, 19,425 deliveries, 19,383 eligible at 24 h).
+
+- **Events.** 154 admissions (148 patients): 127 in delivery hospitalizations (114 strict), 27 outside the delivery flag, 20 of them with an abortive, ectopic or molar code. Fifteen admissions carry a stillbirth code but not the delivery flag, and all 15 also carry an abortive code. No strict code lies outside the obstetric universe (Q-B6 empty). Rate: 5.87 strict per 1,000 delivery hospitalizations (national reference, NCHS, 20 weeks or more: 5.44 in 2024), but 4.05 for 28 weeks or more in ICD-10 admissions against 2.57 nationally.
+- **Gestational age.** Z3A codes exist only in ICD-10 (8,844 of 19,425 deliveries). Among 69 strict ICD-10 events with weeks, 13 (19%) have fewer than 22 weeks, and 7 of those 13 are inside the delivery flag, so the flag does not remove pre-viable losses.
+- **Patients.** 45.0% of patients have more than one admission; only 5 have more than one event admission. Of the 154 events, 61 (40%) are not the patient's first admission. Pregnancy-chain rules change the event count by at most 5 (150, 149, 149 events for 30, 90, 180 days). The 17 admissions after an earlier event admission are all under 90 days (none between 90 and 179), which settles the legacy contradiction.
+- **Era.** ICD-9 covers about 2008–2014 and ICD-10 about 2014–2021, so version and calendar year are almost confounded. The rate rises from 5.2 (2008–10) to 12.9 (2020–22) per 1,000 deliveries (trend p = 0.007, computed by the assistant), and is 5.41 in ICD-9 against 7.88 in ICD-10.
+- **Overlap with other outcomes.** 15 of 136 strict events have severe maternal morbidity (revised definition) and none has maternal death.
+- **Counts for the sample-size check (D12).** 129 strict events among 19,440 admissions; the number at the chosen prediction point is pending (group E).
+
 ## 5. Decisions
 
 Recommendations are mine; they are proposals until you record them in the workbook.
@@ -67,9 +78,9 @@ Recommendations are mine; they are proposals until you record them in the workbo
 |---|---|---|---|---|
 | D1 | Data base | Revised maternal tables; old cohort; both | **Decided:** revised maternal tables | 2026-10-28 |
 | D2 | Name and status of the outcome | *Fetal death* (proxy); *perinatal death* | *Fetal death*, always labelled as a proxy | Before writing |
-| D3 | Primary population | Delivery hospitalizations; any obstetric admission; admissions with a structured obstetric code | Delivery hospitalizations (denominator of births, comparable with a stillbirth rate); the other two as sensitivity | After Q-B2, Q-B3, Q-B6 |
-| D4 | Unit of analysis and same pregnancy | Admission; delivery; pregnancy chain (admissions linked by a gap rule); first admission per patient | Decide with Q-C1 to Q-C4. Default: one record per delivery hospitalization; admissions of the same pregnancy collapsed; the other units as sensitivity | After Q-C |
-| D5 | Outcome definition | Strict; strict plus partial; with or without gestational check | Decide with Q-B1, Q-B4, Q-D2; main definition fixed before modelling; the other as sensitivity | After Q-B, Q-D |
+| D3 | Primary population | Delivery hospitalizations; any obstetric admission; admissions with a structured obstetric code | **Decided 2026-10-28:** delivery hospitalizations (v2 flag) plus admissions with a stillbirth code (Z37.1/.4/.7, V27.1/.4/.7), which the flag misses when an abortive code is also present: 19,440 admissions, 142 events (129 strict). Delivery flag alone and any obstetric admission as sensitivity | 2026-10-28 |
+| D4 | Unit of analysis and same pregnancy | Admission; delivery; pregnancy chain (admissions linked by a gap rule); first admission per patient | **Decided 2026-10-28:** one record per delivery hospitalization, patient-grouped validation; pregnancy chain (gap of 90 days) as sensitivity; first admission per patient rejected (loses 40% of the events) | 2026-10-28 |
+| D5 | Outcome definition | Strict; strict plus partial; with or without gestational check | **Decided 2026-10-28:** strict code at any gestational age as the main definition; strict plus partial, and the bands of 22 or more and 28 or more weeks (ICD-10 only) as sensitivity. The code list is verified in T15 | 2026-10-28 |
 | D6 | Prediction point | Arrival; 24 h after admission (as SMM); retrospective classification | Decide with Q-E1, Q-E2, Q-E4. In the maternal data 19,383 of 19,425 deliveries remained at 24 h, so the loss is expected to be small; check it **for events** | After Q-E |
 | D7 | Time zero and window | Admission time; earliest of ED registration and admission; window from 24 h before to 24 h after (maternal D10) | Same window as the maternal project unless Q-E3 shows a reason to change | After Q-E3 |
 | D8 | Admissions that end before the prediction point | Exclude and report their events apart; include with missing predictors | Exclude and report apart (maternal D8) | After Q-E2 |
@@ -98,7 +109,7 @@ Recommendations are mine; they are proposals until you record them in the workbo
 
 The current `01_fetal_death_models.ipynb` is renamed `00_exploratory_fetal_death_models.ipynb` once the new notebooks exist.
 
-**SQL scripts (proposed, each with its `_es` version).** `sql/01_labels/` (verified code table; label and unit columns), `sql/02_audit_counts/` (groups A–F; `audit_counts.sql` with groups A–D is written and verified, not yet run, task T08; E and F are separate scripts), `sql/03_predictors/` (window, blocks, dictionary, missingness). The four migrated scripts stay in `sql/` until replaced: the feasibility script is superseded by the audit, the dataset and feature scripts are rebuilt on the revised cohort, and the feature-discovery script stays as exploratory evidence.
+**SQL scripts (proposed, each with its `_es` version).** `sql/01_labels/` (verified code table; label and unit columns), `sql/02_audit_counts/` (groups A–F; `audit_counts.sql` for A–D was run on 2026-10-28, `audit_counts_timing.sql` for E is written and verified, not yet run, task T20; F is a separate script), `sql/03_predictors/` (window, blocks, dictionary, missingness). The four migrated scripts stay in `sql/` until replaced: the feasibility script is superseded by the audit, the dataset and feature scripts are rebuilt on the revised cohort, and the feature-discovery script stays as exploratory evidence.
 
 ## 7. Sensitivity analyses
 

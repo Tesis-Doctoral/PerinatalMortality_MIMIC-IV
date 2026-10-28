@@ -59,6 +59,17 @@ Solo lectura y salida agregada; nunca se publican filas con `subject_id` o `hadm
 
 Valores *legacy* por verificar (en un caso se contradicen): 154 eventos (136 solo estrictos); 2 eventos con morbilidad materna grave y 0 muertes maternas entre los eventos estrictos; las admisiones posteriores a una admisión previa con muerte fetal (17, de ellas 5 eventos) se describen como **menos de 90 días** en `fetal_death_features.sql` y como **dentro de 180 días** en el notebook; muerte fetal previa con al menos 365 días de antelación, 1 evento en 78 admisiones.
 
+### Resultados de la auditoría de conteos, grupos A–D (ejecutada el 28/10/2026)
+
+Las cifras completas están en la hoja *Conteos* del Excel de seguimiento. La etiqueta provisional reproduce exactamente el conjunto heredado (154 eventos, 136 estrictos, 0 admisiones discordantes) y los conteos base coinciden con la auditoría materna (25,736 admisiones, 15,084 pacientes, 19,425 partos, 19,383 elegibles a 24 h).
+
+- **Eventos.** 154 admisiones (148 pacientes): 127 en hospitalizaciones de parto (114 estrictos), 27 fuera de la marca de parto, 20 de ellas con un código de aborto, ectópico o molar. Quince admisiones tienen código de mortinato pero no la marca de parto, y las 15 tienen también un código de aborto. Ningún código estricto queda fuera del universo obstétrico (Q-B6 vacía). Tasa: 5.87 estrictos por 1,000 hospitalizaciones de parto (referencia nacional, NCHS, 20 semanas o más: 5.44 en 2024), pero 4.05 para 28 semanas o más en admisiones CIE-10 frente a 2.57 a nivel nacional.
+- **Edad gestacional.** Los códigos Z3A existen solo en CIE-10 (8,844 de 19,425 partos). Entre los 69 eventos estrictos CIE-10 con semanas, 13 (19 %) tienen menos de 22 semanas, y 7 de esos 13 están dentro de la marca de parto, así que la marca no elimina las pérdidas pre-viables.
+- **Pacientes.** El 45.0 % de las pacientes tiene más de una admisión; solo 5 tienen más de una admisión con evento. De los 154 eventos, 61 (40 %) no son la primera admisión de la paciente. Las reglas de cadena de embarazo cambian el número de eventos en 5 como máximo (150, 149 y 149 eventos con 30, 90 y 180 días). Las 17 admisiones posteriores a una admisión con evento son todas de menos de 90 días (ninguna entre 90 y 179), lo que resuelve la contradicción del material heredado.
+- **Época.** CIE-9 cubre aproximadamente 2008–2014 y CIE-10 2014–2021, así que versión y año calendario están casi confundidos. La tasa sube de 5.2 (2008–10) a 12.9 (2020–22) por 1,000 partos (tendencia p = 0.007, calculada por el asistente), y es 5.41 en CIE-9 frente a 7.88 en CIE-10.
+- **Solapamiento con otros desenlaces.** 15 de los 136 eventos estrictos tienen morbilidad materna grave (definición revisada) y ninguno tiene muerte materna.
+- **Conteos para el tamaño de muestra (D12).** 129 eventos estrictos entre 19,440 admisiones; el número en el punto de predicción elegido está pendiente (grupo E).
+
 ## 5. Decisiones
 
 Las recomendaciones son mías; son propuestas hasta que las registres en el Excel.
@@ -67,9 +78,9 @@ Las recomendaciones son mías; son propuestas hasta que las registres en el Exce
 |---|---|---|---|---|
 | D1 | Base de datos | Tablas revisadas del proyecto materno; cohorte antigua; ambas | **Decidida:** tablas revisadas del proyecto materno | 28/10/2026 |
 | D2 | Nombre y estatus del desenlace | *Muerte fetal* (proxy); *muerte perinatal* | *Muerte fetal*, siempre señalada como proxy | Antes de redactar |
-| D3 | Población principal | Hospitalizaciones de parto; cualquier admisión obstétrica; admisiones con código obstétrico estructurado | Hospitalizaciones de parto (denominador de nacimientos, comparable con una tasa de mortinatos); las otras dos como sensibilidad | Después de Q-B2, Q-B3, Q-B6 |
-| D4 | Unidad de análisis y mismo embarazo | Admisión; parto; cadena de embarazo (admisiones unidas por una regla de intervalo); primera admisión por paciente | Decidir con Q-C1 a Q-C4. Por defecto: un registro por hospitalización de parto; admisiones del mismo embarazo colapsadas; las otras unidades como sensibilidad | Después de Q-C |
-| D5 | Definición del desenlace | Estricta; estricta más parcial; con o sin verificación de edad gestacional | Decidir con Q-B1, Q-B4, Q-D2; definición principal fijada antes de modelar; la otra como sensibilidad | Después de Q-B, Q-D |
+| D3 | Población principal | Hospitalizaciones de parto; cualquier admisión obstétrica; admisiones con código obstétrico estructurado | **Decidida el 28/10/2026:** hospitalizaciones de parto (marca v2) más las admisiones con código de mortinato (Z37.1/.4/.7, V27.1/.4/.7), que la marca no ve cuando también hay un código de aborto: 19,440 admisiones, 142 eventos (129 estrictos). Solo la marca de parto y cualquier admisión obstétrica como sensibilidad | 28/10/2026 |
+| D4 | Unidad de análisis y mismo embarazo | Admisión; parto; cadena de embarazo (admisiones unidas por una regla de intervalo); primera admisión por paciente | **Decidida el 28/10/2026:** un registro por hospitalización de parto, con validación agrupada por paciente; cadena de embarazo (intervalo de 90 días) como sensibilidad; primera admisión por paciente descartada (pierde el 40 % de los eventos) | 28/10/2026 |
+| D5 | Definición del desenlace | Estricta; estricta más parcial; con o sin verificación de edad gestacional | **Decidida el 28/10/2026:** código estricto a cualquier edad gestacional como definición principal; estricta más parcial y las franjas de 22 o más y 28 o más semanas (solo CIE-10) como sensibilidad. La lista de códigos se verifica en T15 | 28/10/2026 |
 | D6 | Punto de predicción | Llegada; 24 h después del ingreso (como SMM); clasificación retrospectiva | Decidir con Q-E1, Q-E2, Q-E4. En los datos maternos 19,383 de 19,425 partos seguían hospitalizados a las 24 h, así que se espera una pérdida pequeña; comprobarlo **en los eventos** | Después de Q-E |
 | D7 | Tiempo cero y ventana | Hora de ingreso; el más temprano entre registro en urgencias e ingreso; ventana de 24 h antes a 24 h después (D10 materna) | La misma ventana del proyecto materno, salvo que Q-E3 dé una razón para cambiarla | Después de Q-E3 |
 | D8 | Admisiones que terminan antes del punto de predicción | Excluir y reportar sus eventos aparte; incluir con predictores faltantes | Excluir y reportar aparte (D8 materna) | Después de Q-E2 |
@@ -98,7 +109,7 @@ Las recomendaciones son mías; son propuestas hasta que las registres en el Exce
 
 El `01_fetal_death_models.ipynb` actual se renombra `00_exploratory_fetal_death_models.ipynb` cuando existan los notebooks nuevos.
 
-**Scripts SQL (propuestos, cada uno con su versión `_es`).** `sql/01_labels/` (tabla verificada de códigos; columnas de etiqueta y unidad), `sql/02_audit_counts/` (grupos A–F; `audit_counts.sql` con los grupos A–D está escrito y verificado, aún sin ejecutar, tarea T08; E y F son scripts aparte), `sql/03_predictors/` (ventana, bloques, diccionario, faltantes). Los cuatro scripts migrados permanecen en `sql/` hasta reemplazarse: el de factibilidad lo reemplaza la auditoría, los de conjunto de datos y variables se reconstruyen sobre la cohorte revisada, y el de descubrimiento de variables queda como evidencia exploratoria.
+**Scripts SQL (propuestos, cada uno con su versión `_es`).** `sql/01_labels/` (tabla verificada de códigos; columnas de etiqueta y unidad), `sql/02_audit_counts/` (grupos A–F; `audit_counts.sql` para A–D se ejecutó el 28/10/2026, `audit_counts_timing.sql` para E está escrito y verificado, aún sin ejecutar, tarea T20; F es un script aparte), `sql/03_predictors/` (ventana, bloques, diccionario, faltantes). Los cuatro scripts migrados permanecen en `sql/` hasta reemplazarse: el de factibilidad lo reemplaza la auditoría, los de conjunto de datos y variables se reconstruyen sobre la cohorte revisada, y el de descubrimiento de variables queda como evidencia exploratoria.
 
 ## 7. Análisis de sensibilidad
 

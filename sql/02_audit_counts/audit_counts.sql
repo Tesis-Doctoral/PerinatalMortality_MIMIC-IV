@@ -210,6 +210,14 @@ WHERE  fd_any OR has_stillbirth_code
 GROUP  BY fd_strict, has_stillbirth_code, is_delivery_v2, icd_era
 ORDER  BY fd_strict DESC, has_stillbirth_code DESC, is_delivery_v2 DESC, icd_era;
 
+-- Q-B3b. Admissions with a stillbirth code but WITHOUT the delivery flag: do they carry an abortive, ectopic or molar code?
+SELECT 'Q-B3b stillbirth code without delivery flag' AS q, has_abortive_code,
+       COUNT(*)                          AS n_admissions,
+       COUNT(*) FILTER (WHERE fd_strict) AS n_events_strict
+FROM   tmp_fa
+WHERE  has_stillbirth_code AND NOT is_delivery_v2
+GROUP  BY 2 ORDER BY 2;
+
 -- Q-B4. Gestational weeks of the events (ICD-10 admissions only have Z3A codes)
 SELECT 'Q-B4 gestational weeks of events' AS q, icd_era,
        CASE WHEN fd_strict THEN 'strict' ELSE 'partial only' END AS tier,
@@ -222,6 +230,21 @@ FROM   tmp_fa
 WHERE  fd_any
 GROUP  BY 2, 3, 4
 ORDER  BY 2, 3, 4;
+
+-- Q-B4b. Events by finer gestational-age band, delivery flag and abortive, ectopic or molar code (ICD-10 admissions with a Z3A code)
+--        Settles whether the events under 22 weeks are the ones outside the delivery flag
+SELECT 'Q-B4b weeks by delivery flag and abortive code' AS q,
+       CASE WHEN gest_weeks < 20 THEN '1 under 20 weeks'
+            WHEN gest_weeks < 22 THEN '2 20-21 weeks'
+            WHEN gest_weeks < 28 THEN '3 22-27 weeks'
+            WHEN gest_weeks < 37 THEN '4 28-36 weeks'
+            ELSE                      '5 37 weeks or more' END AS gestational_age,
+       is_delivery_v2, has_abortive_code,
+       COUNT(*)                          AS n_events_strict_or_partial,
+       COUNT(*) FILTER (WHERE fd_strict) AS n_events_strict
+FROM   tmp_fa
+WHERE  fd_any AND gest_weeks IS NOT NULL
+GROUP  BY 2, 3, 4 ORDER BY 2, 3, 4;
 
 -- Q-B5. Position of the fetal-death code in the diagnosis list, and events where no other obstetric code exists
 SELECT 'Q-B5 position of the fetal-death code' AS q,
