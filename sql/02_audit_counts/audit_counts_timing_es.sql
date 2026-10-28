@@ -89,12 +89,12 @@ JOIN   mimiciv.labevents l
 WHERE  b.in_pop
 GROUP  BY b.hadm_id;
 
--- Primer procedimiento de parto y primer procedimiento de inducción (solo fechas; misma lista de parto que hadm_delivery_v2)
+-- Primer procedimiento de parto y primer procedimiento de inducción (solo fechas, convertidas a date porque chartdate puede ser timestamp; misma lista de parto que hadm_delivery_v2)
 -- La lista de inducción (CIE-9 73.0, 73.1, 73.4; CIE-10-PCS 10907ZC) es PROVISIONAL y debe verificarse antes de citarla
 DROP TABLE IF EXISTS tmp_fe_proc;
 CREATE TEMP TABLE tmp_fe_proc AS
 SELECT p.hadm_id,
-       MIN(p.chartdate) FILTER (WHERE
+       MIN(p.chartdate::date) FILTER (WHERE
               (p.icd_version = 10 AND p.icd_code IN ('10D00Z0','10D00Z1','10D00Z2','10E0XZZ',
                                                      '10D07Z3','10D07Z4','10D07Z5','10D07Z6','10D07Z7','10D07Z8'))
            OR (p.icd_version = 9  AND (p.icd_code LIKE '720%' OR p.icd_code LIKE '721%' OR p.icd_code LIKE '7221%'
@@ -106,7 +106,7 @@ SELECT p.hadm_id,
                                         OR p.icd_code LIKE '740%' OR p.icd_code LIKE '741%' OR p.icd_code LIKE '742%'
                                         OR p.icd_code LIKE '744%' OR p.icd_code LIKE '7499%'))
        ) AS first_delivery_proc_date,
-       MIN(p.chartdate) FILTER (WHERE
+       MIN(p.chartdate::date) FILTER (WHERE
               (p.icd_version = 9  AND (p.icd_code LIKE '730%' OR p.icd_code LIKE '731%' OR p.icd_code LIKE '734%'))
            OR (p.icd_version = 10 AND p.icd_code = '10907ZC')
        ) AS first_induction_proc_date
@@ -238,13 +238,13 @@ ORDER  BY ev_group NULLS LAST;
 SELECT 'Q-E4 delivery and induction procedure dates' AS q, b.ev_group,
        COUNT(*)                                                                        AS n_admissions,
        COUNT(*) FILTER (WHERE pr.first_delivery_proc_date IS NULL)                     AS n_no_delivery_procedure,
-       COUNT(*) FILTER (WHERE pr.first_delivery_proc_date - b.admittime::date <  0)    AS n_delivery_before_admission_date,
-       COUNT(*) FILTER (WHERE pr.first_delivery_proc_date - b.admittime::date =  0)    AS n_delivery_day_0,
-       COUNT(*) FILTER (WHERE pr.first_delivery_proc_date - b.admittime::date =  1)    AS n_delivery_day_1,
-       COUNT(*) FILTER (WHERE pr.first_delivery_proc_date - b.admittime::date >= 2)    AS n_delivery_day_2_or_later,
+       COUNT(*) FILTER (WHERE pr.first_delivery_proc_date::date - b.admittime::date <  0)    AS n_delivery_before_admission_date,
+       COUNT(*) FILTER (WHERE pr.first_delivery_proc_date::date - b.admittime::date =  0)    AS n_delivery_day_0,
+       COUNT(*) FILTER (WHERE pr.first_delivery_proc_date::date - b.admittime::date =  1)    AS n_delivery_day_1,
+       COUNT(*) FILTER (WHERE pr.first_delivery_proc_date::date - b.admittime::date >= 2)    AS n_delivery_day_2_or_later,
        COUNT(*) FILTER (WHERE pr.first_induction_proc_date IS NOT NULL)                AS n_with_induction_procedure,
-       COUNT(*) FILTER (WHERE pr.first_induction_proc_date - b.admittime::date =  0)   AS n_induction_day_0,
-       COUNT(*) FILTER (WHERE pr.first_induction_proc_date - b.admittime::date >= 1)   AS n_induction_day_1_or_later
+       COUNT(*) FILTER (WHERE pr.first_induction_proc_date::date - b.admittime::date =  0)   AS n_induction_day_0,
+       COUNT(*) FILTER (WHERE pr.first_induction_proc_date::date - b.admittime::date >= 1)   AS n_induction_day_1_or_later
 FROM   tmp_fe_base b
 LEFT JOIN tmp_fe_proc pr ON pr.hadm_id = b.hadm_id
 WHERE  b.in_pop
