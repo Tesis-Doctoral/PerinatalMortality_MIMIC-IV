@@ -2,7 +2,7 @@
 
 Living document. First version written on 2026-10-28, after running groups A–E and verifying the code catalogue. It reports what the audit measured, what each result settled and what is still open. The plan is in [`analysis_plan.md`](analysis_plan.md) (section 4 lists every count), the per-count figures are in the sheet *Conteos* of the tracking workbook `docs/Plan_Muerte_Fetal_MIMIC-IV.xlsx` (local file, not versioned) and the Spanish version of this document is [`count_audit_es.md`](count_audit_es.md).
 
-**Status.** Groups A–E run (22 of 29 counts). Pending: Q-C5 (notebook, task T13), group F (predictors, tasks T22–T25) and the checks of the label table by admission (Q-T16a to Q-T16g, script written, not yet run). All figures below are aggregate counts; no row-level output with `subject_id` or `hadm_id` is produced or published.
+**Status.** Groups A–E run (22 of 29 counts); label table by admission built and checked on 2026-10-29 (task T16). Pending: Q-C5 (notebook, task T13) and group F (predictors, tasks T22–T25). All figures below are aggregate counts; no row-level output with `subject_id` or `hadm_id` is produced or published.
 
 ## 1. Purpose and principle
 
@@ -20,7 +20,7 @@ The outcome is a **proxy**: a fetal-death diagnosis code on the maternal admissi
 | Group A–D | `sql/02_audit_counts/audit_counts.sql` (task T08), run 2026-10-28 |
 | Group E | `sql/02_audit_counts/audit_counts_timing.sql` (task T20), run 2026-10-28 |
 | Verified codes | `sql/01_labels/01_fetal_death_codes_official.sql` (task T15), run 2026-10-28 |
-| Label table by admission | `sql/01_labels/02_fetal_death_label_by_admission.sql` (task T16), written, not yet run |
+| Label table by admission | `sql/01_labels/02_fetal_death_label_by_admission.sql` (task T16), run 2026-10-29 |
 
 Every script has an `_es` version with identical code (only comments translated), checked with `scripts/check_sql_pair.py`.
 
@@ -153,13 +153,42 @@ Among admissions with a procedure, day 0, day 1 and day 2 or later are 33%, 47% 
 
 ### 3.6 Code verification (T15)
 
-The verified table reproduces the provisional label exactly: 154 events, 136 strict, 18 partial only; 142 and 129 in the population of D3. Every admission with any of these codes in the whole database lies inside the obstetric universe. No admission carries P95, 768.0, 768.1 (newborn-record codes), Z37.6, Z37.7 or V27.6. Seven strict events lie outside the population of D3 (6 with ICD-9 656.4, 1 with ICD-10 O36.4); the six equal the number of 656.43 (antepartum) codes, a coincidence that the label table checks in Q-T16b. The early-loss codes (O02.1, 632) appear in 113 admissions: 102 without an event code (correctly excluded) and 11 with one, which the label table flags as `has_early_loss_code`.
+The verified table reproduces the provisional label exactly: 154 events, 136 strict, 18 partial only; 142 and 129 in the population of D3. Every admission with any of these codes in the whole database lies inside the obstetric universe. No admission carries P95, 768.0, 768.1 (newborn-record codes), Z37.6, Z37.7 or V27.6. Seven strict events lie outside the population of D3 (6 with ICD-9 656.4, 1 with ICD-10 O36.4); all six ICD-9 events carry 656.43 (antepartum), see 3.7. The early-loss codes (O02.1, 632) appear in 113 admissions: 102 without an event code (correctly excluded) and 11 with one, which the label table flags as `has_early_loss_code`.
 
-### 3.7 Pending and not yet run
+### 3.7 Label table by admission (T16)
+
+The table `mimiciv.fetal_death_label_v2` was built on 2026-10-29. It has one row per admission (25,736 rows, 25,736 distinct admissions) and reproduces every earlier count: 154 events (136 strict, 18 partial only), 19,440 admissions in the population of D3 with 142 events (129 strict), 7 strict events outside the population and 11 events with an early-loss code (Q-T16a).
+
+**Strict events outside D3 (Q-T16b).** The 7 events carry only an intrauterine-death code (no stillbirth outcome code, no delivery flag): 6 in ICD-9 and 1 in ICD-10. All 6 ICD-9 events carry 656.43 (antepartum), so the match noted in 3.6 is not a coincidence: no 656.43 admission lies inside D3. The idea that these are antepartum admissions whose delivery comes in a later admission holds for at most 2 of the 7: the next delivery admission of the same patient is 8–90 days later in 1 event, more than 90 days later in 1, and absent from the cohort in 5. MIMIC-IV cannot show where those women delivered. By difference with Q-B8, 4 of the 7 also carry an abortive, ectopic or molar code.
+
+**Code families and position of the code (Q-T16c, Q-T16d), strict events in D3 (129).**
+
+| Code family | ICD-10 | ICD-9 | Position 1 | Positions 2–3 | Positions 4–10 | Position 11 or later |
+|---|---|---|---|---|---|---|
+| Intrauterine death code only (O36.4, 656.4) | 1 | 4 | 1 | 1 | 2 | 1 |
+| Stillbirth outcome code only (Z37, V27) | 27 | 20 | 0 | 23 | 21 | 3 |
+| Both families | 43 | 34 | 64 | 11 | 1 | 1 |
+
+In 65 of 129 strict events (50%) a fetal-death code is the principal diagnosis (position 1); among events that carry only an outcome code (Z37, V27) none is principal. The principal diagnosis is assigned after discharge: it supports the early-detection framing (fetal death is often the reason for the admission) and is one more reason why diagnoses of the same admission cannot be predictors.
+
+**Early-loss codes (Q-T16e).** Of the 129 strict events in D3, 10 carry an early-loss code (O02.1 or 632). All 10 also carry an abortive, ectopic or molar code and all lie among the 15 admissions with a stillbirth code but no delivery flag (5 under 22 weeks, 5 without weeks). Those 15 as a whole: 6 under 22 weeks, 1 at 22–27, 1 at 28 or more and 7 without weeks. At least 6, and probably most, are pre-viable losses coded with outcome-of-delivery codes, and they sit inside the main label. None of the 13 partial-only events in D3 carries an early-loss code; the 11th event with one lies outside D3.
+
+**Size of each label definition (Q-T16f).**
+
+| Scope | Admissions | Main (strict) | Strict + partial | Strict without early-loss code | 22 weeks or more | Weeks unknown | 28 weeks or more |
+|---|---|---|---|---|---|---|---|
+| Population D3 | 19,440 | 129 | 142 | 119 | 55 | 61 | 37 |
+| D3, ICD-10 admissions only | 8,893 | 71 | 80 | 65 | 55 | 3 | 37 |
+| D3, with Z3A weeks | 8,852 | 68 | 77 | 63 | 55 | 0 | 37 |
+
+The 22-week and 28-week definitions can only be applied to ICD-10 admissions (55 and 37 events); the 61 strict events without weeks (58 ICD-9, 3 ICD-10) must be reported apart.
+
+**Admissions shorter than 6 hours (Q-T16g, D8).** 3 admissions of D3 end before 6 hours, all non-events (19,298 non-events; the 13 partial-only and 129 strict events have none); no stay is missing.
+
+### 3.8 Pending and not yet run
 
 | Item | What it will show | Where |
 |---|---|---|
-| Q-T16a–g | Integrity of the label table, the 7 strict events outside D3, code families and position, events with early-loss codes, label sizes, admissions under 6 h | `02_fetal_death_label_by_admission.sql` |
 | Q-C5 | Patient leakage of an admission-level split | notebook `01_patient_overlap` (T13) |
 | Q-F1–F6 | Predictor availability, coverage rule, history visibility, outpatient records, units, outcome-related codes among the first diagnoses | group F (T22–T25) |
 
@@ -168,12 +197,12 @@ The verified table reproduces the provisional label exactly: 154 events, 136 str
 | Decision | Choice (2026-10-28) | Evidence |
 |---|---|---|
 | D1 database | Revised tables of the maternal project | Base counts match the maternal audit; the label reproduces the legacy dataset (Q-A1, Q-A2) |
-| D3 population | Delivery flag v2 **or** stillbirth code (19,440 admissions; 142 events, 129 strict) | The flag alone leaves out 15 admissions with a stillbirth code, all with an abortive code (Q-B3b); no strict code outside the universe (Q-B6) |
+| D3 population | Delivery flag v2 **or** stillbirth code (19,440 admissions; 142 events, 129 strict) | The flag alone leaves out 15 admissions with a stillbirth code, all with an abortive code (Q-B3b); no strict code outside the universe (Q-B6); 7 of the 136 strict events (5.1%) stay outside D3 and are reported apart (Q-T16b) |
 | D4 unit | One record per delivery hospitalization, validation grouped by patient; 90-day pregnancy chain as sensitivity | Chains change the event count by at most 5 (Q-C4); first admission only would lose 40% of the events (Q-C3); 5 patients have more than one event admission (Q-C1) |
-| D5 outcome | Strict code at any gestational age as main; sensitivities: strict + partial, 22 weeks or more, 28 weeks or more (ICD-10 only), excluding events with an early-loss code | Weeks exist only in ICD-10 and 19% of strict events with weeks are under 22 (Q-B4, Q-D2); the 20/22/28-week definitions differ by source |
+| D5 outcome | Strict code at any gestational age as main; sensitivities: strict + partial, 22 weeks or more, 28 weeks or more (ICD-10 only); S11 (confirmed 2026-10-29): excluding the 10 strict events with an early-loss code | Weeks exist only in ICD-10 and 19% of strict events with weeks are under 22 (Q-B4, Q-D2); 55 events at 22 weeks or more and 61 with unknown weeks (Q-T16f); 10 strict events in D3 carry an early-loss code (Q-T16e); the 20/22/28-week definitions differ by source |
 | D6 prediction point | Admission + 6 h (12 h, 24 h and retrospective as sensitivities) | At 24 h 13.2% of strict events are lost against 0.15% of non-events; all 129 remain at 6 h (Q-E1, Q-E2) |
 | D7 time zero and window | Admission time; window from 24 h before admission to the prediction point | First laboratory value around admission and half before it; ED registration a median 3 h earlier (Q-E3) |
-| D8 short admissions | Exclude the 3 admissions that end before 6 h (0 events) and report them apart | Q-E2b: 19,440 − 19,437 admissions at 6 h |
+| D8 short admissions | Exclude the 3 admissions that end before 6 h (0 events) and report them apart | Q-E2b: 19,440 − 19,437 admissions at 6 h; Q-T16g: the 3 are non-events and no stay is missing |
 
 Open decisions: D2 (outcome name) and D9–D14 (predictor blocks, coverage rule, models, sample size, reporting).
 
@@ -181,7 +210,8 @@ Open decisions: D2 (outcome name) and D9–D14 (predictor blocks, coverage rule,
 
 - **Early risk or detection model, not a forecast of a later event.** The label is a discharge code without a time and fetal death is often already present at arrival; the model estimates the risk of a fetal-death code from information available up to the prediction point.
 - **Era confounding.** ICD version, gestational-age availability and calendar period move together; the rise from 5.2 to 12.9 per 1,000 may reflect coding practice as well as case mix. Any sensitivity analysis by version cannot separate them.
-- **Pre-viable losses.** The delivery flag does not remove them (7 of 13 strict events under 22 weeks are inside it); only ICD-10 admissions allow a weeks-based cut, and 3 strict ICD-10 events have no weeks.
+- **Pre-viable losses.** The delivery flag does not remove them (7 of 13 strict events under 22 weeks are inside it) and the main label contains pre-viable losses coded with outcome-of-delivery codes (10 strict events with an early-loss code, at least 6 of the 15 stillbirth-code admissions without delivery flag under 22 weeks; section 3.7). Only ICD-10 admissions allow a weeks-based cut: of the 129 strict events in D3, 55 have 22 weeks or more, 13 have fewer and 61 have no weeks (58 ICD-9, 3 ICD-10).
+- **Events outside D3.** Seven strict events (5.1% of 136), all with only an intrauterine-death code and 6 of them ICD-9 656.43 antepartum admissions, are not in the population; their delivery is not in the cohort for 5 of the 7. Including them would select admissions by an outcome code, so they are reported apart.
 - **Denominators.** The rates use hospital deliveries of a tertiary centre; comparison with national figures is a plausibility check only.
 - **Provisional elements.** The induction procedure list (ICD-9 73.0, 73.1, 73.4; ICD-10-PCS 10907ZC) is provisional. The CDC and CMS code files were not downloaded; the catalogue rests on AAPC, Kodex, findacode and icd9data pages and on the WHO ICD-10 2019 browser, and must be cross-checked before submission. The O31.2 seventh character and the Z3A codes were not verified one by one; WHO has no ICD-9.
 - **Trend test.** The p = 0.007 was computed by the assistant and must be reproduced in the analysis code before it is quoted.
