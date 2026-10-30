@@ -2,7 +2,7 @@
 
 Prediction models for **perinatal death** in obstetric admissions of MIMIC-IV, starting with the **fetal-death component** identified from the mother's ICD codes (the "Modelo C" of the thesis). This project is the continuation of the earlier exploratory work done inside `MaternalMortality_MIMIC-IV`, which is kept in [`legacy/`](legacy/) as a reference.
 
-> **Status: migration finished, not yet run.** The folders, configuration, analysis plan, the four SQL scripts (with `_es` versions), the dataset queries in `libraries/database.py` and the modelling notebook are in place. Nothing in this repository has been run in its new location.
+> **Status: migration finished; the new SQL scripts are being run one by one.** Run so far: the verified code table (T15), the count audit (T08, T20) and the label by admission (T16). Written and waiting to be run: the unit of analysis (T17). The four migrated scripts in `sql/`, the dataset queries in `libraries/database.py` and the modelling notebook have not been run in their new location.
 
 [Versión en español](README_es.md)
 
@@ -16,6 +16,8 @@ Prediction models for **perinatal death** in obstetric admissions of MIMIC-IV, s
 The analysis plan (version 2, 2026-10-28) is in [`analysis_plan.md`](analysis_plan.md) (Spanish: [`analysis_plan_es.md`](analysis_plan_es.md)). It follows the maternal project: a count audit and the decisions on cohort, unit of analysis and prediction point come before any model. Progress is tracked task by task in the local workbook `docs/Plan_Muerte_Fetal_MIMIC-IV.xlsx` (not versioned).
 
 The count audit is written up in [`count_audit.md`](count_audit.md) (Spanish: [`count_audit_es.md`](count_audit_es.md)): what each count measured, what it settled and what is still open.
+
+The framework mockup that fits the maternal and perinatal models (and a slot for the neonatal one) is in [`framework.md`](framework.md) (Spanish: [`framework_es.md`](framework_es.md)).
 
 ## Repository structure
 
@@ -41,6 +43,8 @@ PerinatalMortality_MIMIC-IV.code-workspace
 **Verified code catalogue (plan task T15, run on 2026-10-28).** `sql/01_labels/01_fetal_death_codes_official.sql` (Spanish: `01_fetal_death_codes_official_es.sql`) creates `mimiciv.fetal_death_code_patterns_v2`: every fetal-death code pattern with its official title, its tier (strict, partial or excluded) and its source, plus five aggregate checks (Q-T15a to Q-T15e). It replaces the 13 provisional patterns of the legacy scripts; the codes themselves do not change, but early fetal death (O02.1, 632) and newborn-record codes (P95, 768.0, 768.1) are now listed as explicitly excluded. Run it as one whole script in one connection (DBeaver: Alt+X).
 
 **Label by admission (plan task T16, run on 2026-10-29).** `sql/01_labels/02_fetal_death_label_by_admission.sql` (Spanish: `02_fetal_death_label_by_admission_es.sql`) creates `mimiciv.fetal_death_label_v2`, one row per admission of `cohort_obstetric_v2`, built from the verified code table. Besides the main label (strict code, decision D5) it carries, as columns and not as filters, the tier of the event, the code families, the position of the code, the early-loss and newborn-record flags, the gestational weeks from Z3A codes, the ICD era, the population flag of D3 and the flag of D8 (`ends_before_6h`). Seven aggregate checks (Q-T16a to Q-T16g) follow. Run it as one whole script in one connection (DBeaver: Alt+X); the table is persistent, so the checks can be re-run alone.
+
+**Unit of analysis (plan task T17, written on 2026-10-29, not yet run).** `sql/00_mimic_layer/01_unit_of_analysis.sql` (Spanish: `01_unit_of_analysis_es.sql`) creates `mimiciv.unit_of_analysis_v2`, one row per admission of `cohort_obstetric_v2` and no outcome column: it is the MIMIC-IV adapter of stage E4 of the framework (see `framework.md`). It carries the contract columns (`unit_id`, `group_id`, `t0`, `t_pred` = admission + 6 h, `t_end`), the period (ICD era, anchor-year group), the order of admissions, the gap to the previous one and the pregnancy chains for gaps of 30, 90 and 180 days. Seven aggregate checks (Q-T17a to Q-T17g) reproduce the figures of the count audit and the consistency with the label table; they need `fetal_death_label_v2` (T16). Run it as one whole script in one connection (DBeaver: Alt+X).
 
 **Count audit (plan task T08, run on 2026-10-28).** `sql/02_audit_counts/audit_counts.sql` (Spanish: `audit_counts_es.sql`) works on the revised tables of the maternal project (`cohort_obstetric_v2`, `hadm_delivery_v2`, `obstetric_dx_v2`, `predictors_24h_v2`). It is read-only (temporary tables and SELECTs, aggregate output) and covers groups A–D of the plan: base counts, events and definition, patient overlap and same pregnancy, era and coding. Run it as one whole script in one connection (DBeaver: Alt+X); every result set starts with a column `q` that matches the identifier in the sheet *Conteos* of the tracking workbook. The label is provisional (the 13 legacy code patterns) until the verified code table of task T15; Q-C5 is computed in the notebook of task T13.
 
