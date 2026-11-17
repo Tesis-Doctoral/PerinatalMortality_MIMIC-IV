@@ -1,6 +1,6 @@
 # Plan de análisis — modelos de muerte fetal, MIMIC-IV (versión 2)
 
-Documento de trabajo, escrito el 28/10/2026 después de migrar el material anterior. Sigue el diseño del proyecto materno revisado (`MaternalMortality_MIMIC-IV`, manuscrito healthcare-4661619): una **auditoría de conteos antes de cualquier modelo**, una cohorte sin solapamiento de pacientes entre entrenamiento y evaluación, un punto de predicción fijo, validación anidada agrupada por paciente y análisis de sensibilidad que incluyen la pregunta de si pueden usarse los diagnósticos de la misma admisión.
+Documento de trabajo, escrito el 28/10/2026 después de migrar el material anterior. Sigue el diseño del proyecto materno revisado (`MaternalMortality_MIMIC-IV_Cureus`): una **auditoría de conteos antes de cualquier modelo**, una cohorte sin solapamiento de pacientes entre entrenamiento y evaluación, un punto de predicción fijo, validación anidada agrupada por paciente y análisis de sensibilidad que incluyen la pregunta de si pueden usarse los diagnósticos de la misma admisión.
 
 Los puntos marcados **[decisión]** están abiertos; se listan en la sección 5 y en la hoja *Decisiones* del Excel de seguimiento `docs/Plan_Muerte_Fetal_MIMIC-IV.xlsx` (archivo local, no versionado). Las cifras marcadas *legacy* vienen de los scripts exploratorios migrados desde `legacy/` y **deben verificarse de nuevo** con la auditoría antes de citarse en cualquier lugar. Versión en inglés: [`analysis_plan.md`](analysis_plan.md). La primera versión de este plan se conserva en `docs/backup_plan_v1/`.
 
@@ -39,7 +39,7 @@ Equivalencia de las piezas del proyecto materno con este proyecto (los scripts p
 | F2 · Desenlace y etiquetas | tabla de códigos verificada, etiqueta y columnas de unidad sobre la cohorte revisada | script de etiquetas + conteos |
 | F3 · Predictores y temporalidad | conteos E–F, punto de predicción, ventana, diccionario de predictores | D6–D10 resueltas |
 | F4 · Marco de validación | tamaño de muestra, modelos, validación anidada agrupada por paciente, calibración | D11, D12 resueltas |
-| F5 · Análisis de sensibilidad | S1–S11 (sección 7) | un archivo de salida por análisis |
+| F5 · Análisis de sensibilidad | SA1–SA11 (sección 7) | un archivo de salida por análisis |
 | F6 · Reporte | salidas agregadas, TRIPOD+AI, tablas suplementarias, manuscrito o capítulo | D13, D14 resueltas |
 
 ## 4. Auditoría de conteos (antes de cualquier modelo)
@@ -85,11 +85,11 @@ Las recomendaciones son mías; son propuestas hasta que las registres en el Exce
 | D2 | Nombre y estatus del desenlace | *Muerte fetal* (proxy); *muerte perinatal*; *muerte perinatal antes del nacimiento* | **Decidida el 28/10/2026:** *muerte perinatal antes del nacimiento* (parte anteparto de la muerte perinatal: muerte fetal o mortinato), siempre señalada como proxy; no se capturan las muertes neonatales tempranas | Antes de redactar |
 | D3 | Población principal | Hospitalizaciones de parto; cualquier admisión obstétrica; admisiones con código obstétrico estructurado | **Decidida el 28/10/2026:** hospitalizaciones de parto (marca v2) más las admisiones con código de mortinato (Z37.1/.4/.7, V27.1/.4/.7), que la marca no ve cuando también hay un código de aborto: 19,440 admisiones, 142 eventos (129 estrictos). Solo la marca de parto y cualquier admisión obstétrica como sensibilidad | 28/10/2026 |
 | D4 | Unidad de análisis y mismo embarazo | Admisión; parto; cadena de embarazo (admisiones unidas por una regla de intervalo); primera admisión por paciente | **Decidida el 28/10/2026:** un registro por hospitalización de parto, con validación agrupada por paciente; cadena de embarazo (intervalo de 90 días) como sensibilidad; primera admisión por paciente descartada (pierde el 40 % de los eventos) | 28/10/2026 |
-| D5 | Definición del desenlace | Estricta; estricta más parcial; con o sin verificación de edad gestacional | **Decidida el 28/10/2026:** código estricto a cualquier edad gestacional como definición principal; estricta más parcial y las franjas de 22 o más y 28 o más semanas (solo CIE-10) como sensibilidad; **añadida el 29/10/2026:** excluir los 10 eventos estrictos con código de pérdida temprana (S11). La lista de códigos se verifica en T15 | 28/10/2026 |
+| D5 | Definición del desenlace | Estricta; estricta más parcial; con o sin verificación de edad gestacional | **Decidida el 28/10/2026:** código estricto a cualquier edad gestacional como definición principal; estricta más parcial y las franjas de 22 o más y 28 o más semanas (solo CIE-10) como sensibilidad; **añadida el 29/10/2026:** excluir los 10 eventos estrictos con código de pérdida temprana (SA11). La lista de códigos se verifica en T15 | 28/10/2026 |
 | D6 | Punto de predicción | Llegada; 24 h después del ingreso (como SMM); clasificación retrospectiva | **Decidida el 28/10/2026:** hora de ingreso + 6 h. Conserva los 129 eventos estrictos y 19,437 de las 19,440 admisiones. Sensibilidad: 12 h (124 eventos), 24 h como el proyecto materno (112 eventos) y clasificación retrospectiva | 28/10/2026 |
 | D7 | Tiempo cero y ventana | Hora de ingreso; el más temprano entre registro en urgencias e ingreso; ventana de 24 h antes a 24 h después (D10 materna) | **Decidida el 28/10/2026:** tiempo cero = hora de ingreso; ventana desde 24 h antes del ingreso hasta el punto de predicción de D6 (la ventana materna con el final acortado). Se descarta lo más temprano entre urgencias e ingreso (solo el 2.3 % de las admisiones tiene registro en urgencias) | 28/10/2026 |
 | D8 | Admisiones que terminan antes del punto de predicción | Excluir y reportar sus eventos aparte; incluir con predictores faltantes | **Decidido el 28/10/2026:** excluir las 3 admisiones que terminan antes de ingreso + 6 h (0 eventos) y reportarlas aparte (columna `ends_before_6h` de la tabla de etiqueta) | Después de D6 |
-| D9 | Diagnósticos de la misma admisión | Fuera de todo modelo; fuera del principal con sensibilidad retrospectiva; dentro | Fuera del modelo principal; sensibilidad S7 | Después de Q-F6 |
+| D9 | Diagnósticos de la misma admisión | Fuera de todo modelo; fuera del principal con sensibilidad retrospectiva; dentro | Fuera del modelo principal; sensibilidad SA7 | Después de Q-F6 |
 | D10 | Selección de predictores | Prespecificada por regla temporal, justificación clínica y cobertura; o elegida por contraste con el desenlace | Prespecificada. El contraste con el desenlace solo puede usarse para **excluir** pruebas que filtran información (como coagulación y LDH), nunca para incluir variables, salvo dentro de cada pliegue de entrenamiento | Después de Q-F |
 | D11 | Modelos y desbalance | Ensamble apilado más regresión logística; solo regresión logística regularizada; remuestreo | Regresión logística penalizada como referencia y candidata principal; ensamble comparado en los mismos pliegues; sin SMOTE; pesos de clase solo como opción de la grilla | Después del cálculo de tamaño de muestra |
 | D12 | Modelo o análisis de factibilidad | Modelo completo; análisis descriptivo más un modelo simple prespecificado | Decidir con los criterios de Riley et al. y el número final de eventos | Después de Q-C4 y tamaño de muestra |
@@ -109,30 +109,30 @@ Las recomendaciones son mías; son propuestas hasta que las registres en el Exce
 | `03_resampling_comparison` | sin corrección, pesos de clase, SMOTENC (solo si D11 lo permite) | 03 |
 | `04_availability_indicators` | con y sin los indicadores de disponibilidad de hemograma, panel y OMR | 04 |
 | `05_era_temporal_validation` | era calendario, versión de ICD, validación temporal | 05 |
-| `06_same_admission_diagnoses` | sensibilidad retrospectiva con grupos de diagnósticos sin los códigos del desenlace (S7) | nuevo |
+| `06_same_admission_diagnoses` | sensibilidad retrospectiva con grupos de diagnósticos sin los códigos del desenlace (SA7) | nuevo |
 | `07_timing_vs_prediction_point` | eventos ubicados en el tiempo con fechas de procedimientos | 07 |
 
 El `01_fetal_death_models.ipynb` actual se renombra `00_exploratory_fetal_death_models.ipynb` cuando existan los notebooks nuevos.
 
-**Scripts SQL (propuestos, cada uno con su versión `_es`).** `sql/01_labels/` (`01_fetal_death_codes_official.sql`, la tabla verificada de códigos, se ejecutó el 28/10/2026, tarea T15; `02_fetal_death_label_by_admission.sql`, la tabla de etiqueta por admisión `fetal_death_label_v2`, se ejecutó el 29/10/2026, tarea T16; `sql/00_mimic_layer/` (`01_unit_of_analysis.sql`, el adaptador de MIMIC-IV de la etapa E4 del framework, independiente del desenlace, tabla `unit_of_analysis_v2`: unidad, grupo por paciente, tiempo cero y punto de predicción, intervalo con la admisión previa y cadenas de embarazo de 30, 90 y 180 días; escrito el 29/10/2026, tarea T17, aún sin ejecutar), `sql/02_audit_counts/` (grupos A–F; `audit_counts.sql` para A–D se ejecutó el 28/10/2026, `audit_counts_timing.sql` para E se ejecutó el 28/10/2026, tarea T20; F es un script aparte), `sql/03_predictors/` (ventana, bloques, diccionario, faltantes). Los cuatro scripts migrados permanecen en `sql/` hasta reemplazarse: el de factibilidad lo reemplaza la auditoría, los de conjunto de datos y variables se reconstruyen sobre la cohorte revisada, y el de descubrimiento de variables queda como evidencia exploratoria.
+**Scripts SQL (propuestos, cada uno con su versión `_es`).** `sql/01_labels/` (`01_fetal_death_codes_official.sql`, la tabla verificada de códigos, se ejecutó el 28/10/2026, tarea T15; `02_fetal_death_label_by_admission.sql`, la tabla de etiqueta por admisión `fetal_death_label_v2`, se ejecutó el 29/10/2026, tarea T16; `sql/00_mimic_layer/` (`01_unit_of_analysis.sql`, el adaptador de MIMIC-IV de la etapa E5 del framework, independiente del desenlace, tabla `unit_of_analysis_v2`: unidad, grupo por paciente, tiempo cero y punto de predicción, intervalo con la admisión previa y cadenas de embarazo de 30, 90 y 180 días; escrito el 29/10/2026, tarea T17, aún sin ejecutar), `sql/02_audit_counts/` (grupos A–F; `audit_counts.sql` para A–D se ejecutó el 28/10/2026, `audit_counts_timing.sql` para E se ejecutó el 28/10/2026, tarea T20; F es un script aparte), `sql/03_predictors/` (ventana, bloques, diccionario, faltantes). Los cuatro scripts migrados permanecen en `sql/` hasta reemplazarse: el de factibilidad lo reemplaza la auditoría, los de conjunto de datos y variables se reconstruyen sobre la cohorte revisada, y el de descubrimiento de variables queda como evidencia exploratoria.
 
 ## 7. Análisis de sensibilidad
 
 | ID | Análisis | Pregunta |
 |---|---|---|
-| S1 | Desenlace solo estricto | ¿Los códigos parciales (embarazo múltiple) cambian el resultado? |
-| S2 | Solo admisiones ICD-10; edad gestacional de al menos 22 semanas donde se conoce | ¿Se sostiene la definición de 22 semanas? |
-| S3 | Un registro por paciente o por embarazo | ¿El solapamiento de pacientes o el embarazo repetido inflan el rendimiento? |
-| S4 | Alcance: parto, código obstétrico estructurado, cualquier admisión obstétrica | ¿La población cambia el resultado? |
-| S5 | Con y sin variables ambulatorias (OMR); con y sin indicadores de disponibilidad | ¿El modelo aprende quién se evaluó y no la fisiología? |
-| S6 | Era calendario, versión de ICD, validación temporal | ¿El modelo aprende el período? |
-| S7 | **Diagnósticos de la misma admisión usados o no** | ¿Cuánto del rendimiento aparente viene de información que produce el evento? Se reporta como clasificación retrospectiva, nunca como predicción |
-| S8 | Excluir eventos que también tienen morbilidad materna grave o muerte materna | ¿Importa el solapamiento con los desenlaces maternos? |
-| S9 | Comparación de remuestreo (opcional) | ¿Ayuda el remuestreo? |
-| S10 | Mortinato tardío: edad gestacional de 28 semanas o más, solo admisiones ICD-10 | ¿Se sostiene el resultado con el umbral de la OMS para comparación internacional? |
-| S11 | Excluir los 10 eventos estrictos con código de pérdida temprana (O02.1, 632); quedan 119 estrictos | ¿Las pérdidas previables codificadas con códigos de desenlace de parto determinan el resultado? (confirmada el 29/10/2026, tras Q-T16e) |
+| SA1 | Desenlace solo estricto | ¿Los códigos parciales (embarazo múltiple) cambian el resultado? |
+| SA2 | Solo admisiones ICD-10; edad gestacional de al menos 22 semanas donde se conoce | ¿Se sostiene la definición de 22 semanas? |
+| SA3 | Un registro por paciente o por embarazo | ¿El solapamiento de pacientes o el embarazo repetido inflan el rendimiento? |
+| SA4 | Alcance: parto, código obstétrico estructurado, cualquier admisión obstétrica | ¿La población cambia el resultado? |
+| SA5 | Con y sin variables ambulatorias (OMR); con y sin indicadores de disponibilidad | ¿El modelo aprende quién se evaluó y no la fisiología? |
+| SA6 | Era calendario, versión de ICD, validación temporal | ¿El modelo aprende el período? |
+| SA7 | **Diagnósticos de la misma admisión usados o no** | ¿Cuánto del rendimiento aparente viene de información que produce el evento? Se reporta como clasificación retrospectiva, nunca como predicción |
+| SA8 | Excluir eventos que también tienen morbilidad materna grave o muerte materna | ¿Importa el solapamiento con los desenlaces maternos? |
+| SA9 | Comparación de remuestreo (opcional) | ¿Ayuda el remuestreo? |
+| SA10 | Mortinato tardío: edad gestacional de 28 semanas o más, solo admisiones ICD-10 | ¿Se sostiene el resultado con el umbral de la OMS para comparación internacional? |
+| SA11 | Excluir los 10 eventos estrictos con código de pérdida temprana (O02.1, 632); quedan 119 estrictos | ¿Las pérdidas previables codificadas con códigos de desenlace de parto determinan el resultado? (confirmada el 29/10/2026, tras Q-T16e) |
 
-**S7 en detalle.** Modelo principal: ningún diagnóstico de la misma admisión (el desenlace se define con diagnósticos). Sensibilidad: agregar indicadores de grupos de diagnóstico de la misma admisión sin los códigos del desenlace ni sus acompañantes directos, y reportar el cambio en AUROC y AUPRC como la parte del rendimiento que viene de información producida por el evento. Los diagnósticos de admisiones **anteriores** (antecedentes) se mantienen en el modelo principal.
+**SA7 en detalle.** Modelo principal: ningún diagnóstico de la misma admisión (el desenlace se define con diagnósticos). Sensibilidad: agregar indicadores de grupos de diagnóstico de la misma admisión sin los códigos del desenlace ni sus acompañantes directos, y reportar el cambio en AUROC y AUPRC como la parte del rendimiento que viene de información producida por el evento. Los diagnósticos de admisiones **anteriores** (antecedentes) se mantienen en el modelo principal.
 
 ## 8. Reporte
 

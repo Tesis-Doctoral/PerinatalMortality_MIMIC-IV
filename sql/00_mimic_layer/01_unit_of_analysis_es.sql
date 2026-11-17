@@ -1,6 +1,6 @@
 -- ============================================================================
 -- 00_mimic_layer / 01_unit_of_analysis.sql
--- Adaptador de MIMIC-IV de la etapa E4 del framework (unidad de análisis y traslape) -- plan v2, tarea T17
+-- Adaptador de MIMIC-IV de la etapa E5 del framework (unidad de análisis y traslape) -- plan v2, tarea T17
 -- ============================================================================
 -- Propósito: construir mimiciv.unit_of_analysis_v2, UNA FILA POR ADMISIÓN del universo obstétrico
 --   revisado (mimiciv.cohort_obstetric_v2), con todo lo que la capa de método necesita para definir la
@@ -9,7 +9,7 @@
 --   La misma tabla sirve al modelo de muerte fetal (perinatal) y a los modelos maternos; los módulos de
 --   desenlace (por ejemplo 01_labels/02_fetal_death_label_by_admission.sql) se unen a ella por hadm_id.
 --
--- Contrato de datos del framework (framework_es.md, sección 3.1) -> columnas de esta tabla:
+-- Contrato de datos del framework (framework_es.md, sección 2) -> columnas de esta tabla:
 --   unit_id    = hadm_id                      (un registro = una admisión hospitalaria)
 --   group_id   = subject_id                   (todas las particiones de validación se agrupan por paciente)
 --   t0         = admittime                    (tiempo cero, decisión D7)

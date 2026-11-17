@@ -1,6 +1,6 @@
 # Analysis plan — fetal-death models, MIMIC-IV (version 2)
 
-Working document, written on 2026-10-28 after the migration of the legacy material. It follows the design of the revised maternal project (`MaternalMortality_MIMIC-IV`, manuscript healthcare-4661619): a **count audit before any model**, a cohort without patient overlap between training and evaluation, a fixed prediction time, nested patient-grouped validation, and sensitivity analyses that include the question of whether same-admission diagnoses may be used.
+Working document, written on 2026-10-28 after the migration of the legacy material. It follows the design of the revised maternal project (`MaternalMortality_MIMIC-IV_Cureus`): a **count audit before any model**, a cohort without patient overlap between training and evaluation, a fixed prediction time, nested patient-grouped validation, and sensitivity analyses that include the question of whether same-admission diagnoses may be used.
 
 Items marked **[decision]** are open; they are listed in section 5 and in the sheet *Decisiones* of the tracking workbook `docs/Plan_Muerte_Fetal_MIMIC-IV.xlsx` (local file, not versioned). Figures labelled *legacy* come from the exploratory scripts migrated from `legacy/` and **must be re-verified** with the audit before they are quoted anywhere. Spanish version: [`analysis_plan_es.md`](analysis_plan_es.md). The first version of this plan is kept in `docs/backup_plan_v1/`.
 
@@ -39,7 +39,7 @@ How the maternal pieces map to this project (scripts to write are named in secti
 | F2 · Outcome and labels | verified code table, label and unit columns on the revised cohort | label script + counts |
 | F3 · Predictors and timing | counts E–F, prediction point, window, predictor dictionary | D6–D10 settled |
 | F4 · Validation framework | sample size, models, nested patient-grouped validation, calibration | D11, D12 settled |
-| F5 · Sensitivity analyses | S1–S11 (section 7) | one output file per analysis |
+| F5 · Sensitivity analyses | SA1–SA11 (section 7) | one output file per analysis |
 | F6 · Reporting | aggregate outputs, TRIPOD+AI, supplementary tables, manuscript or chapter | D13, D14 settled |
 
 ## 4. Count audit (before any model)
@@ -85,11 +85,11 @@ Recommendations are mine; they are proposals until you record them in the workbo
 | D2 | Name and status of the outcome | *Fetal death* (proxy); *perinatal death*; *perinatal death before birth* | **Decided 2026-10-28:** *perinatal death before birth* (antenatal part of perinatal death: fetal death or stillbirth), always labelled as a proxy; early neonatal deaths are not captured | Before writing |
 | D3 | Primary population | Delivery hospitalizations; any obstetric admission; admissions with a structured obstetric code | **Decided 2026-10-28:** delivery hospitalizations (v2 flag) plus admissions with a stillbirth code (Z37.1/.4/.7, V27.1/.4/.7), which the flag misses when an abortive code is also present: 19,440 admissions, 142 events (129 strict). Delivery flag alone and any obstetric admission as sensitivity | 2026-10-28 |
 | D4 | Unit of analysis and same pregnancy | Admission; delivery; pregnancy chain (admissions linked by a gap rule); first admission per patient | **Decided 2026-10-28:** one record per delivery hospitalization, patient-grouped validation; pregnancy chain (gap of 90 days) as sensitivity; first admission per patient rejected (loses 40% of the events) | 2026-10-28 |
-| D5 | Outcome definition | Strict; strict plus partial; with or without gestational check | **Decided 2026-10-28:** strict code at any gestational age as the main definition; strict plus partial, and the bands of 22 or more and 28 or more weeks (ICD-10 only) as sensitivity; **added 2026-10-29:** excluding the 10 strict events with an early-loss code (S11). The code list is verified in T15 | 2026-10-28 |
+| D5 | Outcome definition | Strict; strict plus partial; with or without gestational check | **Decided 2026-10-28:** strict code at any gestational age as the main definition; strict plus partial, and the bands of 22 or more and 28 or more weeks (ICD-10 only) as sensitivity; **added 2026-10-29:** excluding the 10 strict events with an early-loss code (SA11). The code list is verified in T15 | 2026-10-28 |
 | D6 | Prediction point | Arrival; 24 h after admission (as SMM); retrospective classification | **Decided 2026-10-28:** admission time + 6 h. It keeps all 129 strict events and 19,437 of the 19,440 admissions. Sensitivity: 12 h (124 events), 24 h as in the maternal project (112 events) and retrospective classification | 2026-10-28 |
 | D7 | Time zero and window | Admission time; earliest of ED registration and admission; window from 24 h before to 24 h after (maternal D10) | **Decided 2026-10-28:** time zero = admission time; window from 24 h before admission to the prediction point of D6 (the maternal window with a shorter end). Earliest of ED registration and admission rejected (only 2.3% of admissions have an ED registration) | 2026-10-28 |
 | D8 | Admissions that end before the prediction point | Exclude and report their events apart; include with missing predictors | **Decided 2026-10-28:** exclude the 3 admissions that end before admission + 6 h (0 events) and report them apart (column `ends_before_6h` of the label table) | After D6 |
-| D9 | Same-admission diagnoses | Out of every model; out of the main model with a retrospective sensitivity; in | Out of the main model; sensitivity S7 | After Q-F6 |
+| D9 | Same-admission diagnoses | Out of every model; out of the main model with a retrospective sensitivity; in | Out of the main model; sensitivity SA7 | After Q-F6 |
 | D10 | Predictor selection | Pre-specified by time rule, clinical rationale and coverage; or chosen by outcome contrast | Pre-specified. Outcome contrast may be used only to **exclude** leaking tests (as with coagulation and LDH), never to include variables, unless done inside each training fold | After Q-F |
 | D11 | Models and imbalance | Stacked ensemble plus logistic regression; regularised logistic regression only; resampling | Penalised logistic regression as reference and primary candidate; ensemble compared in the same folds; no SMOTE; class weights only as a grid option | After the sample-size check |
 | D12 | Model or feasibility analysis | Full model; descriptive analysis plus a simple pre-specified model | Decide with the Riley et al. criteria and the final number of events | After Q-C4 and sample size |
@@ -109,30 +109,30 @@ Recommendations are mine; they are proposals until you record them in the workbo
 | `03_resampling_comparison` | no correction, class weights, SMOTENC (only if D11 allows) | 03 |
 | `04_availability_indicators` | with and without the availability indicators of blood count, panel and OMR | 04 |
 | `05_era_temporal_validation` | calendar era, ICD version, temporal validation | 05 |
-| `06_same_admission_diagnoses` | retrospective sensitivity with diagnosis groups excluding the outcome codes (S7) | new |
+| `06_same_admission_diagnoses` | retrospective sensitivity with diagnosis groups excluding the outcome codes (SA7) | new |
 | `07_timing_vs_prediction_point` | events placed in time with procedure dates | 07 |
 
 The current `01_fetal_death_models.ipynb` is renamed `00_exploratory_fetal_death_models.ipynb` once the new notebooks exist.
 
-**SQL scripts (proposed, each with its `_es` version).** `sql/01_labels/` (`01_fetal_death_codes_official.sql`, the verified code table, was run on 2026-10-28, task T15; `02_fetal_death_label_by_admission.sql`, the label table by admission `fetal_death_label_v2`, was run on 2026-10-29, task T16; `sql/00_mimic_layer/` (`01_unit_of_analysis.sql`, the outcome-agnostic MIMIC-IV adapter of framework stage E4, table `unit_of_analysis_v2`: unit, patient group, time zero and prediction point, gap to the previous admission and pregnancy chains of 30, 90 and 180 days; written 2026-10-29, task T17, not yet run), `sql/02_audit_counts/` (groups A–F; `audit_counts.sql` for A–D was run on 2026-10-28, `audit_counts_timing.sql` for E was run on 2026-10-28, task T20; F is a separate script), `sql/03_predictors/` (window, blocks, dictionary, missingness). The four migrated scripts stay in `sql/` until replaced: the feasibility script is superseded by the audit, the dataset and feature scripts are rebuilt on the revised cohort, and the feature-discovery script stays as exploratory evidence.
+**SQL scripts (proposed, each with its `_es` version).** `sql/01_labels/` (`01_fetal_death_codes_official.sql`, the verified code table, was run on 2026-10-28, task T15; `02_fetal_death_label_by_admission.sql`, the label table by admission `fetal_death_label_v2`, was run on 2026-10-29, task T16; `sql/00_mimic_layer/` (`01_unit_of_analysis.sql`, the outcome-agnostic MIMIC-IV adapter of framework stage S5, table `unit_of_analysis_v2`: unit, patient group, time zero and prediction point, gap to the previous admission and pregnancy chains of 30, 90 and 180 days; written 2026-10-29, task T17, not yet run), `sql/02_audit_counts/` (groups A–F; `audit_counts.sql` for A–D was run on 2026-10-28, `audit_counts_timing.sql` for E was run on 2026-10-28, task T20; F is a separate script), `sql/03_predictors/` (window, blocks, dictionary, missingness). The four migrated scripts stay in `sql/` until replaced: the feasibility script is superseded by the audit, the dataset and feature scripts are rebuilt on the revised cohort, and the feature-discovery script stays as exploratory evidence.
 
 ## 7. Sensitivity analyses
 
 | ID | Analysis | Question |
 |---|---|---|
-| S1 | Strict-only outcome | Do partial codes (multiple pregnancy) change the result? |
-| S2 | ICD-10 admissions only; gestational age of at least 22 weeks where known | Does the 22-week definition hold? |
-| S3 | One record per patient or per pregnancy | Does patient overlap or repeated pregnancy inflate performance? |
-| S4 | Scope: delivery, structured obstetric code, any obstetric admission | Does the population change the result? |
-| S5 | With and without outpatient (OMR) features; with and without availability indicators | Does the model learn who was tested rather than physiology? |
-| S6 | Calendar era, ICD version, temporal validation | Does the model learn the period? |
-| S7 | **Same-admission diagnoses used or not** | How much apparent performance comes from information the event produces? Reported as retrospective classification, never as prediction |
-| S8 | Excluding events that also have severe maternal morbidity or maternal death | Does overlap with the maternal outcomes matter? |
-| S9 | Resampling comparison (optional) | Does resampling help? |
-| S10 | Late stillbirth: gestational age of 28 weeks or more, ICD-10 admissions only | Does the result hold at the WHO threshold used for international comparison? |
-| S11 | Excluding the 10 strict events with an early-loss code (O02.1, 632); 119 strict events remain | Do pre-viable losses coded with outcome-of-delivery codes drive the result? (confirmed 2026-10-29, after Q-T16e) |
+| SA1 | Strict-only outcome | Do partial codes (multiple pregnancy) change the result? |
+| SA2 | ICD-10 admissions only; gestational age of at least 22 weeks where known | Does the 22-week definition hold? |
+| SA3 | One record per patient or per pregnancy | Does patient overlap or repeated pregnancy inflate performance? |
+| SA4 | Scope: delivery, structured obstetric code, any obstetric admission | Does the population change the result? |
+| SA5 | With and without outpatient (OMR) features; with and without availability indicators | Does the model learn who was tested rather than physiology? |
+| SA6 | Calendar era, ICD version, temporal validation | Does the model learn the period? |
+| SA7 | **Same-admission diagnoses used or not** | How much apparent performance comes from information the event produces? Reported as retrospective classification, never as prediction |
+| SA8 | Excluding events that also have severe maternal morbidity or maternal death | Does overlap with the maternal outcomes matter? |
+| SA9 | Resampling comparison (optional) | Does resampling help? |
+| SA10 | Late stillbirth: gestational age of 28 weeks or more, ICD-10 admissions only | Does the result hold at the WHO threshold used for international comparison? |
+| SA11 | Excluding the 10 strict events with an early-loss code (O02.1, 632); 119 strict events remain | Do pre-viable losses coded with outcome-of-delivery codes drive the result? (confirmed 2026-10-29, after Q-T16e) |
 
-**S7 in detail.** Main model: no diagnosis of the same admission (the outcome is defined by diagnoses). Sensitivity: add diagnosis-group indicators of the same admission with the outcome codes and their direct companions removed, and report the change in AUROC and AUPRC as the part of performance that comes from information produced by the event. Diagnoses of **earlier** admissions (history) stay in the main model.
+**SA7 in detail.** Main model: no diagnosis of the same admission (the outcome is defined by diagnoses). Sensitivity: add diagnosis-group indicators of the same admission with the outcome codes and their direct companions removed, and report the change in AUROC and AUPRC as the part of performance that comes from information produced by the event. Diagnoses of **earlier** admissions (history) stay in the main model.
 
 ## 8. Reporting
 

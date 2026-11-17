@@ -199,7 +199,7 @@ The 22-week and 28-week definitions can only be applied to ICD-10 admissions (55
 | D1 database | Revised tables of the maternal project | Base counts match the maternal audit; the label reproduces the legacy dataset (Q-A1, Q-A2) |
 | D3 population | Delivery flag v2 **or** stillbirth code (19,440 admissions; 142 events, 129 strict) | The flag alone leaves out 15 admissions with a stillbirth code, all with an abortive code (Q-B3b); no strict code outside the universe (Q-B6); 7 of the 136 strict events (5.1%) stay outside D3 and are reported apart (Q-T16b) |
 | D4 unit | One record per delivery hospitalization, validation grouped by patient; 90-day pregnancy chain as sensitivity | Chains change the event count by at most 5 (Q-C4); first admission only would lose 40% of the events (Q-C3); 5 patients have more than one event admission (Q-C1) |
-| D5 outcome | Strict code at any gestational age as main; sensitivities: strict + partial, 22 weeks or more, 28 weeks or more (ICD-10 only); S11 (confirmed 2026-10-29): excluding the 10 strict events with an early-loss code | Weeks exist only in ICD-10 and 19% of strict events with weeks are under 22 (Q-B4, Q-D2); 55 events at 22 weeks or more and 61 with unknown weeks (Q-T16f); 10 strict events in D3 carry an early-loss code (Q-T16e); the 20/22/28-week definitions differ by source |
+| D5 outcome | Strict code at any gestational age as main; sensitivities: strict + partial, 22 weeks or more, 28 weeks or more (ICD-10 only); SA11 (confirmed 2026-10-29): excluding the 10 strict events with an early-loss code | Weeks exist only in ICD-10 and 19% of strict events with weeks are under 22 (Q-B4, Q-D2); 55 events at 22 weeks or more and 61 with unknown weeks (Q-T16f); 10 strict events in D3 carry an early-loss code (Q-T16e); the 20/22/28-week definitions differ by source |
 | D6 prediction point | Admission + 6 h (12 h, 24 h and retrospective as sensitivities) | At 24 h 13.2% of strict events are lost against 0.15% of non-events; all 129 remain at 6 h (Q-E1, Q-E2) |
 | D7 time zero and window | Admission time; window from 24 h before admission to the prediction point | First laboratory value around admission and half before it; ED registration a median 3 h earlier (Q-E3) |
 | D8 short admissions | Exclude the 3 admissions that end before 6 h (0 events) and report them apart | Q-E2b: 19,440 − 19,437 admissions at 6 h; Q-T16g: the 3 are non-events and no stay is missing |
@@ -224,6 +224,6 @@ Open decisions: D2 (outcome name) and D9–D14 (predictor blocks, coverage rule,
 - WHO ICD-10 (2019 browser): O36.4, Z37, P95 (screenshots supplied by the author on 2026-10-28).
 - ICD-10-CM (AAPC, Kodex, findacode.com) and ICD-9-CM (icd9data.com): code titles and inclusion terms, as listed in the header of `sql/01_labels/01_fetal_death_codes_official.sql`.
 - Stillbirth thresholds: WHO and ICD-11, 22 weeks; NCHS, 20 weeks.
-- MIMIC-IV tables and the revised maternal cohort: `MaternalMortality_MIMIC-IV` (manuscript healthcare-4661619).
+- MIMIC-IV tables and the revised maternal cohort: `MaternalMortality_MIMIC-IV_Cureus`.
 
 *Confidential: internal use of the research project; aggregate results only.*

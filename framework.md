@@ -1,192 +1,145 @@
-# Framework for outcome models in MIMIC-IV — mockup
+# Staged framework for clinical prediction models — version 1.0
 
-Draft mockup, version 0.1, written on 2026-10-29. Nothing here is implemented as shared code yet. It is built from two real cases, the maternal project (`MaternalMortality_MIMIC-IV`: severe maternal morbidity and maternal death) and this project (perinatal death before birth), and leaves a slot for the neonatal model. The status of the maternal case comes from its README, its analysis plan of the notebooks and its count audit; the status of this project comes from [`analysis_plan.md`](analysis_plan.md) and [`count_audit.md`](count_audit.md). The neonatal case has not been mapped. Spanish version: [`framework_es.md`](framework_es.md). An interactive view of the stage map is the artifact "Framework de desenlaces MIMIC-IV".
+Version 1.0, 2026-11-17. It replaces the mockup of 2026-10-29 (version 0.1, kept in [`docs/backup_framework_v0.1/`](docs/backup_framework_v0.1/)). This version is the framework as it was applied and published in the severe maternal morbidity (SMM) study (`MaternalMortality_MIMIC-IV_Cureus`, article submitted to Cureus in November 2026), with the rules added during that application. This project, perinatal death before birth, is its second application. Spanish version: [`framework_es.md`](framework_es.md).
 
-## 1. Why a framework
+> **Nomenclature.** English files use stages S1 to S11 and gates G1 to G4, as in the SMM article. Spanish files use E1 to E11 and P1 to P4 for the same stages and gates. The sensitivity analyses of this project's plan were renamed SA1 to SA11 so that they do not clash with the stages. Version 0.1 numbered the stages E0 to E11; the equivalence is in section 9.
 
-The maternal project went through the same path that this one is following: an exploratory first model (maternal mortality), a count audit that showed how few events there were, a revision of the labels, a pivot to severe maternal morbidity as the main outcome with maternal death kept as a feasibility question, sensitivity analyses and reporting. Writing that path once, as stages with fixed inputs and outputs, turns a new outcome into a module instead of a new project, and it shows which steps a model skipped.
+![Staged framework: eleven stages in four blocks, four gates, returns R1 to R4 and the sample-size reduction](docs/framework_figure.png)
 
-## 2. Principles that do not change
+*Figure. Figure 1 of the SMM article. A dot marks the stages that use the outcome card and a square those that use the data adapter; unmarked stages are reused unchanged. S: stage; G: gate; R: return.*
 
-1. **Audit before model.** Counts that decide the design (population, unit, definition, timing, sample size) are measured and recorded before any model is fitted.
-2. **No overlap and no selection by outcome.** A cohort rule is first measured as a column and only then applied as a filter, with its sensitivity analysis.
-3. **The label is a documented proxy.** A verified code catalogue (official title, tier, source, date) and a label table with one row per unit, where the sensitivity definitions are columns, not filters.
-4. **Patient-grouped validation, everything inside the training part.** Imputation, scaling, tuning, stacking and recalibration are fitted inside each training fold.
-5. **Prediction point and information window are fixed before the predictors.** Diagnoses of the same admission are not predictors in the main model.
-6. **Every choice is a numbered decision** (D1, D2, …) with its evidence, and a sensitivity analysis when the choice could change the result.
-7. **Aggregate outputs only.** No `subject_id`, `hadm_id` or `stay_id` in any published result.
-8. **Reproducibility.** Fixed configuration, certified expected counts that stop a run when the population is not the audited one, SQL scripts in EN/ES pairs checked by script, TRIPOD+AI reporting.
+## 1. What the framework answers
 
-## 3. Architecture
+A model with good discrimination may predict events that have not yet happened, or it may only recognize events already under way when the prediction is made. The framework takes any adverse outcome from definition to reporting and ends by classifying the fitted model as a **predictor**, an **early identifier** or **neither**. The SMM study showed why: a model with an AUROC of 0.79 failed three of four criteria and was an early identifier.
 
-Three layers and the gates between stages. The **method** layer is everything that does not depend on the dataset or the outcome: the stages, the validation, the stacked ensemble, the metrics and the reporting. The **data adapter** is the code that turns one dataset into the table the method reads (SQL for MIMIC-IV today; the neonatal dataset and the data of a health entity will need their own). The **outcome module** is the small set of choices that define one outcome (section 5). The **gates** are the decisions that must be recorded before the next stage starts. The method never reads a dataset directly: it reads the contract table of section 3.1.
+## 2. Three layers
 
-![Path to a defensible model: stages E0 to E11, three decision gates, stacked ensemble inside E8, feasibility branch and the prevention stage E10](framework_flow.svg)
-
-*Figure. The path of every outcome. Dots mark the stages where the outcome card enters; squares mark the stages that depend on the data adapter; the amber dashed path is the feasibility branch; the dashed teal block is the proposed prevention stage.*
-
-The path through the stages is the same for every outcome. What changes is the outcome card that feeds E1, E2, E5, E6, E9 and E10. The gate at E7 is where the maternal project decided that maternal death (3 events among the eligible deliveries) could only be a feasibility analysis while severe maternal morbidity (445 events) could be modelled.
-
-## 3.1 Data contract
-
-Whatever the dataset, an adapter has to deliver one table with one row per unit of analysis and these columns. Stages E4 to E11 run from that table only.
-
-| Column | Meaning | MIMIC-IV adapter today |
+| Layer | Holds | Changes when |
 |---|---|---|
-| `unit_id` | Identifier of one unit of analysis | `hadm_id` |
-| `group_id` | What must never be split between training and test | `subject_id` (patient) |
-| `t0` | Time zero | Admission time |
-| `t_pred` | Prediction point | `t0` + 6 h (perinatal), `t0` + 24 h (maternal) |
-| `label_*` | Main label and sensitivity labels, as columns | `fetal_death_label_v2`, `label_admission_v2` |
-| `x_*` with its availability time | Predictors and the moment each value became known | Predictors table of the 24-hour window rule |
-| `period` | Calendar period or coding era, if the dataset has one | ICD version, anchor-year group |
+| **Core** | Stages, gates, validation, metrics, classification rule, reporting | Never between outcomes |
+| **Outcome card** | Rung on the outcome ladder, population, event definition and timing, prediction point, own predictors, reduced predictor set, primary learner, sensitivity set, expected counts | A new outcome needs a new card |
+| **Data adapter** | Code that turns one data source into the contract table | A new data source needs a new adapter |
 
-Rules for any adapter: one row per unit; no personal identifier leaves the database; the counts reproduce the expected counts of the configuration; the same table feeds the audit and the models. If a dataset has no group identifier or no timestamps, the adapter must say so and the framework records the decision (for the neonatal dataset: the mother or the newborn as group, and whether E4 applies).
+The core reads only the **contract table**: one row per unit of analysis with `unit_id`, `group_id` (never split between training and test), `t0` (time zero), `t_pred` (prediction point), the main label and sensitivity labels as columns, each predictor with an indicator of whether it was measured, and `period` (calendar period or coding era). For MIMIC-IV the adapter is `sql/00_mimic_layer/01_unit_of_analysis.sql` (task T17) plus the label and predictor tables.
 
-## 3.2 Which layer owns each stage
+## 3. Stages and gates
 
-| Stage | Layer |
+| Block | Stage or gate | Question | Card | Adapter |
+|---|---|---|---|---|
+| Define and audit | **S1** Governance and configuration | What is fixed before anything runs? | • | |
+| | **S2** Universe and population | Which units can be studied? | • | ■ |
+| | **S3** Outcome definition | What counts as an event, from which sources, and when did it happen? | • | ■ |
+| | **S4** Count audit | How many events, where, when, with what overlap? | • | ■ |
+| | **G1** Definition gate | Are population, unit and definition fixed, and do the reference counts reproduce? | | |
+| Fix the prediction point | **S5** Unit of analysis and overlap | What is one record, and what must stay on one side of a split? | | ■ |
+| | **S6** Prediction point and window | When is the prediction made and what information may it use? | • | ■ |
+| | **G2** Leakage gate | Does nothing after the prediction point enter, and are partitions grouped by patient? | | |
+| Build | **S7** Predictors | Which variables, with what coverage and limits? | • | ■ |
+| | **G3** Sample-size gate | Are there enough events for the candidate parameters (Riley et al.)? | | |
+| | **S8** Modeling, validation and metrics | How well does it work, with what uncertainty? | | |
+| Check and act | **S9** Sensitivity and robustness | Does it survive other reasonable choices, including criteria C1 to C4? | • | ■ |
+| | **G4** Classification gate | Predictor, early identifier or neither? | | |
+| | **S10** From classification to action | What use fits the class, and is it fair across subgroups? | • | ■ |
+| | **S11** Reporting (TRIPOD+AI) | What is delivered? | • | |
+
+No model is fitted before G3. Every decision goes to the **decision log** with its date, the options considered, the option chosen, the reason, the type of reason (clinical, methodological or technical) and who validated it.
+
+## 4. The gates in detail
+
+**G1, definition.** Population, unit and event definition are fixed and the reference counts can be reproduced (an `EXPECTED` check stops any run whose population is not the audited one).
+
+**G2, leakage.** No information after the prediction point enters the model (no diagnoses, procedures, DRG codes or treatments of the same admission), and every partition is grouped by patient. Imputation, scaling, tuning, stacking and recalibration are fitted inside the training part.
+
+**G3, sample size.** The criteria of Riley et al. (expected shrinkage of 0.9 or more, optimism in explained variation of 0.05 or less, precise overall risk) give the minimum number of units and events for the candidate parameters, using the observed Cox-Snell R² of a cross-validated logistic regression (or an assumed value when no model can be fitted). If the data fall short, the outcome is reported as a feasibility analysis and return R1 moves to the next rung of the outcome ladder.
+
+**Sample-size reduction (rule added 2026-11-09).** When a model meets every applicable criterion of G4 but fails G3, it may be refitted **once** with a reduced predictor set that does not exceed the parameters the data support. The reduced set is fixed in the outcome card by rules (collapse categories, keep the core clinical variables), never by the association of a predictor with the outcome. The reduced model must pass G3 and is classified again at G4 with the same thresholds. It is not a return.
+
+**G4, classification.** Four criteria, each tested with a prespecified sensitivity analysis:
+
+| Criterion | Question | Passed if |
+|---|---|---|
+| C1, events already present | How much does performance fall when events present at the prediction point are removed (landmark population)? | AUROC falls by 0.05 or less and at least two thirds of the AUPRC gain over prevalence is kept |
+| C2, outcome with time | Does performance hold for events dated after the prediction point? | AUROC of 0.75 or more, with a lower 95% limit of 0.70 or more |
+| C3, detection bias | Does performance hold among patients who were tested, when the outcome depends on a test? | AUROC falls by 0.05 or less |
+| C4, stability over time | Does the model discriminate and calibrate in a later period? | Temporal AUROC of 0.70 or more, and calibration correctable by the intercept alone |
+
+- **Predictor:** AUROC of 0.75 or more in the landmark population or on an outcome with time, and passes C1 to C4. Proceeds to a prevention strategy.
+- **Early identifier:** AUROC of 0.75 or more with the full label and the top 10% of risk holds at least twice the events expected by chance, but fails C1, C3 or C4. Suited to surveillance and prioritization of review, not to prevention.
+- **Neither:** otherwise, or a temporal AUROC below 0.65.
+
+A criterion that cannot apply to an outcome (for example C3 when the outcome does not depend on a test) is marked *not applicable* in the card, with the reason, before any model is fitted.
+
+## 5. Returns and the outcome ladder
+
+| Return | From | To | What changes |
+|---|---|---|---|
+| R1 | G3 | S3 | Next rung of the outcome ladder |
+| R2 | G4 | S3 | An outcome dated after the prediction point |
+| R3 | G4 | S6 | Another prediction point |
+| R4 | G4 | S7 | More or different predictors |
+
+At most two returns per outcome; every return is reported and the model is classified again after each one. With no return left and no use, or no rung left at G3, the result goes to S11 as negative or feasibility.
+
+**Outcome ladder** (three rungs): the ideal outcome; a more frequent surrogate on the same clinical path; an outcome dated after the prediction point. In the SMM study: maternal death (3 events, feasibility) → SMM → escalation of care after 24 hours.
+
+## 6. Modeling rules (S8)
+
+- Nested cross-validation grouped by patient (5 outer folds × 3 repeats, inner grouped folds), Platt recalibration inside training, patient-level bootstrap intervals.
+- Metrics: AUROC, AUPRC against prevalence, Brier score, calibration slope and intercept, observed-to-expected ratio, expected calibration error, share of events in the top 5% and 10% of risk, decision curve.
+- Base learners: penalized logistic regression, random forest, extra trees, XGBoost; stacked ensemble with a logistic meta-learner as a comparison. The ensemble is adopted only if it outperforms the best base learner consistently (D16 of the SMM log).
+- **Primary learner by events per parameter (rule proposed 2026-11-11, pending the supervisor's validation).** Fixed in the outcome card before any model: with fewer than 20 events per candidate parameter, penalized logistic regression is the primary model and the others are comparisons; with 20 or more, the best base learner of a preliminary run. It applies to outcomes analysed after 2026-11-11 and does not change the SMM article.
+- No resampling in the main analysis (imbalance corrections harm calibration); class weights and resampling only as sensitivity.
+
+## 7. Principles that do not change
+
+1. Audit before model.
+2. Rules are measured as columns first and applied as filters afterwards, each with its sensitivity analysis.
+3. The label is a documented proxy: verified code catalogue (title, tier, source, date) and a label table with sensitivity definitions as columns.
+4. Prediction point and window are fixed before the predictors.
+5. Every choice is a numbered decision in the log.
+6. Aggregate outputs only; small cells suppressed; no identifiers in any published file.
+7. SQL in EN/ES pairs with identical code (`scripts/check_sql_pair.py`), fixed configuration, TRIPOD+AI reporting.
+
+## 8. Status by stage
+
+As of 2026-11-17. The perinatal outcome card is [`docs/outcome_card_fetal_death.md`](docs/outcome_card_fetal_death.md).
+
+| Stage or gate | SMM (first application) | Perinatal death before birth | Tasks and files of this project |
+|---|---|---|---|
+| S1 Governance | Done | In progress: D9–D14 open | `analysis_plan.md`, tracking workbook (local) |
+| S2 Universe and population | Done | Done (D1, D3) | maternal `cohort_obstetric_v2`, `hadm_delivery_v2` |
+| S3 Outcome definition | Done | Code list and label done (T15, T16); **event timing pending** | `sql/01_labels/` |
+| S4 Count audit | Done | Groups A–E done; group F pending (T22–T25) | `sql/02_audit_counts/`, `count_audit.md` |
+| G1 Definition | Passed | Pending: needs the timing classes of S3 | |
+| S5 Unit and overlap | Done | Decided (D4); table written, not run (T17); Q-C5 pending (T13) | `sql/00_mimic_layer/01_unit_of_analysis.sql` |
+| S6 Prediction point and window | Done (24 h) | Decided (D6–D8: admission + 6 h) | |
+| G2 Leakage | Passed | Pending | |
+| S7 Predictors | Done | Pending (group F, D9, D10) | `sql/03_predictors/` (to write) |
+| G3 Sample size | SMM passed; maternal death failed (R1); escalation passed after reduction | Pending (D12) | |
+| S8 Modeling | Done | Pending | notebooks of `analysis_plan.md` section 6 |
+| S9 Sensitivity | Done | Defined (SA1–SA11, C1–C4), not run | |
+| G4 Classification | Early identifier; escalation an exploratory signal | Pending | |
+| S10 Action | Subgroups and equity | Pending | |
+| S11 Reporting | Article submitted (Cureus) | Pending (D14) | |
+
+## 9. Equivalence with version 0.1
+
+| Version 0.1 | Version 1.0 |
 |---|---|
-| E0 Governance | Method |
-| E1 Universe and population | Data adapter |
-| E2 Outcome definition | Outcome module, reading the adapter's code tables |
-| E3 Count audit | Method structure (groups A–F), adapter queries |
-| E4 Unit of analysis and overlap | Data adapter |
-| E5 Prediction point and window | Outcome module, using the adapter's timestamps |
-| E6 Predictors | Data adapter and outcome module |
-| E7 Feasibility gate | Method |
-| E8 Modelling, validation and metrics | Method |
-| E9 Sensitivity and robustness | Method, plus the outcome's own set |
-| E10 From prediction to prevention strategy | Method, outcome module and the health entity |
-| E11 Reporting | Method |
-## 4. Stage map
+| E0 Governance | S1 |
+| E1 Universe and population | S2 |
+| E2 Outcome definition | S3 (now also the event timing) |
+| E3 Count audit | S4, followed by G1 |
+| E4 Unit of analysis | S5 |
+| E5 Prediction point | S6, followed by G2 |
+| E6 Predictors | S7 |
+| E7 Feasibility gate | G3, with the sample-size reduction |
+| E8 Modeling (stacking as default) | S8; the primary learner is now chosen by events per parameter |
+| E9 Sensitivity | S9, with criteria C1 to C4 |
+| — | G4 classification gate and returns R1 to R4 (new) |
+| E10 Prediction to prevention strategy | S10, which now depends on the class given at G4 |
+| E11 Reporting | S11 |
 
-Stages are numbered E0 to E11 (E from the Spanish etapa) so that they do not clash with the sensitivity analyses S1–S11 of the analysis plan.
-
-| Stage | Question it answers | Reused part (method, or the MIMIC-IV adapter) | Outcome parameter |
-|---|---|---|---|
-| E0 Governance and configuration | What is fixed before anything runs so that analyses are comparable? | Decision register, tracking workbook, seed and fixed settings (5 × 3 folds, bootstrap, trees), expected counts, EN/ES script pairs | Configuration file of the outcome (proposal FD2) |
-| E1 Universe and population | Which admissions can be studied? | Obstetric universe tables (`cohort_obstetric_v2`, `hadm_delivery_v2`, `obstetric_dx_v2`) | Population rule |
-| E2 Outcome definition | What exactly counts as an event, and from which sources? | Code catalogue structure (tier, title, source, date); label table, one row per unit, sensitivities as columns | The code list and the tiers |
-| E3 Count audit | How many events, where, when and with what overlap? | Groups A–F: base, events, patient overlap, era, eligibility and timing, predictors | Events per definition |
-| E4 Unit of analysis and overlap | What is one record, and who appears on both sides of a split? | Unit columns (admission rank, gap, pregnancy chain, first admission) without outcome columns; simulation of admission-level splitting | None |
-| E5 Prediction point and window | When is the prediction made and what may it use? | Time zero, prediction point, information window, eligibility, events lost, no same-admission diagnoses | The prediction point |
-| E6 Predictors | Which variables, with what coverage and limits? | Dictionary, 10% coverage rule, plausibility limits, missingness indicators | Outcome-specific blocks |
-| E7 Feasibility gate | Are there enough events to model? | Riley criteria, events per parameter, decision: full model or feasibility only | None |
-| E8 Modelling, validation and metrics | How well does it work, with what uncertainty? | Patient-grouped nested validation and leak-free pipeline; base models (logistic regression, random forest, extra trees, XGBoost); **stacked ensemble with a logistic meta-learner as the default strategy**, always compared with logistic regression and with the best base model under the same validation; recalibration, patient-level bootstrap, calibration, decision curve, paired differences | None |
-| E9 Sensitivity and robustness | Does the result survive other reasonable choices? | Resampling, era and ICD version, temporal validation, availability indicators, timing of events against the prediction point | The outcome's own sensitivity set |
-| E10 From prediction to prevention strategy | How does the risk estimate become a decision and an action in a health entity? | Risk tiers and thresholds taken from the decision curve and the events captured in the top 5% and 10% of risk, tied to the entity's capacity; actionable against non-actionable predictors; subgroup and equity check; alert design with human validation; local validation and recalibration before use; monitoring of calibration | The actions the entity can take for that outcome, defined with its clinical team |
-| E11 Reporting | What is delivered? | TRIPOD+AI, code-list supplements, missingness tables, aggregate output files | Outcome text |
-
-## 4.1 Stacking inside E8
-
-Stacking is the modelling strategy of the framework, and it is what the maternal and neonatal studies have in common (the neonatal manuscript is a stacked ensemble; the maternal severe-morbidity model uses a stacked ensemble with a logistic meta-learner). What the framework fixes is how it is built and how it is judged:
-
-*Drawn inside stage E8 of the figure in section 3: four base models, out-of-fold predictions, logistic meta-learner, Platt recalibration, and the paired comparison.*
-
-1. Base models and the meta-learner are tuned in nested folds; the meta-learner sees only out-of-fold predictions.
-2. Recalibration is fitted inside the training part and reported as part of the whole procedure.
-3. The stack is never reported alone: the framework requires the paired difference against regularized logistic regression and against the best base model, with patient-level bootstrap intervals. In the maternal study the gain of the stack over logistic regression was small (AUROC +0.009, 95% interval 0.002 to 0.016) and there was no difference from XGBoost, so the comparison is part of the result, not a formality.
-4. Whatever the outcome, the same four base models and the same meta-learner are used, so the outcomes can be compared with each other.
-
-## 4.2 E10 in detail: from prediction to prevention strategy
-
-The thesis title asks for models that support prevention strategies and action plans in health entities, so the framework needs a stage after the model is validated. This stage is a proposal: none of the three outcomes has gone through it, and the maternal manuscript states that its models are research prototypes that must not guide individual clinical decisions. Its deliverable is a one-page strategy sheet per outcome:
-
-1. Risk tiers and the threshold of each tier, with the reason (for example the share of events captured in the top 5% and 10% of risk and the decision-curve range), and the entity's capacity to act on each tier.
-2. Which predictors can be acted on or monitored and which only describe the patient.
-3. Performance and calibration by subgroup (age band, insurance type, ICD era), reported even when it is poor.
-4. Who receives the alert, who validates it (a responsible clinician) and which action follows.
-5. Local validation and recalibration with the entity's own data before any use, because the models are built on one US hospital.
-6. A monitoring metric and a review date (calibration drift, event rate).
-
-## 5. Outcome module
-
-A module is a card with the fields below. Filling it is the only thing a new outcome has to do before the stages run. The perinatal column is filled from this project; the maternal columns from the maternal project; the neonatal column lists what has to be defined.
-
-| Field | Severe maternal morbidity | Maternal death | Perinatal death before birth | Neonatal (slot) |
-|---|---|---|---|---|
-| Dataset | MIMIC-IV | MIMIC-IV | MIMIC-IV | Not MIMIC-IV; not available yet |
-| Status | Manuscript in revision | Feasibility only | In progress: audit and label done | Manuscript exists; not mapped |
-| Unit | Delivery hospitalization | Delivery hospitalization | Delivery hospitalization (D4) | To define (neonatal stay) |
-| Population | Delivery hospitalizations still in hospital at 24 h: 19,383 | Same | Delivery flag or stillbirth code (D3): 19,440 | To define |
-| Event definition | At least one of the 20 active CDC indicators (ICD-9-CM, ICD-10-CM/PCS) | Death in the same admission | Strict code of fetal death at any gestational age; tiers strict, partial, excluded | To define |
-| Events | 445 (2.30%) | 3 | 142 with partial codes, 129 strict | To define |
-| Event time | Diagnosis codes without time; procedure codes with a date | Death time | None: discharge code | To confirm |
-| Prediction point | 24 h after admission | 24 h | Admission + 6 h (D6) | To define |
-| Label table | `label_admission_v2` (model B) | Same table (model A) | `fetal_death_label_v2` | To define |
-| Sample-size gate | Passed: full model | Failed: feasibility | Pending (D12) | To define |
-| Own sensitivity set | Creatinine indicator, renal-only, timing against the prediction point | None | Strict plus partial, 22 and 28 weeks, early-loss codes excluded (S1–S11 of the plan) | To define |
-| Use in the entity (E10) | Not yet: the manuscript calls the models research prototypes, not for individual decisions | Not applicable | To define | To define |
-| Known hazard | Missing creatinine encodes who was tested | Too few events | Label has no time; pre-viable losses; weeks only in ICD-10 | To define |
-
-## 6. Outcome ladder
-
-A pattern that the maternal project followed and that this project is following: a target outcome is first audited; if the audit shows too few events at the prediction point, a related outcome with more events becomes the main model and the target is kept as a feasibility analysis.
-
-*Drawn as the feasibility branch of the figure in section 3: gate 3 sends an outcome with too few events to a feasibility analysis, and an outcome with enough events to the full model.*
-
-In the maternal project the target was maternal death and the related outcome was severe maternal morbidity. For perinatal death before birth the audit found 129 strict events in 19,440 admissions; the decision D12 will say whether that is enough for the full model.
-
-## 7. Maturity by stage
-
-Status as of 2026-10-29. "Shared" means the stage is the same as for severe maternal morbidity.
-
-| Stage | Severe maternal morbidity | Maternal death | Perinatal death before birth | Neonatal |
-|---|---|---|---|---|
-| E0 Governance | Done | Shared | In progress (D9–D14 open) | To map |
-| E1 Universe and population | Done | Shared | Done (D1, D3) | To map |
-| E2 Outcome definition | Done (official CDC list) | Done | Done (T15, T16) | To map |
-| E3 Count audit | Done | Done | Groups A–E done, group F pending | To map |
-| E4 Unit and overlap | Done (notebook 01) | Shared | Pending (T17, T13) | To map |
-| E5 Prediction point and window | Done (24 h) | Shared | Decided (D6–D8), table pending | To map |
-| E6 Predictors | Done | Shared | Pending (group F) | To map |
-| E7 Feasibility gate | Done: full model | Done: feasibility only | Pending (D12) | To map |
-| E8 Modelling and validation | Done (notebook 02) | Not modelled | Pending | To map |
-| E9 Sensitivity | Done (notebooks 03–07) | Not applicable | Defined (S1–S11), not run | To map |
-| E10 Prediction to strategy | Pending | Not applicable | Pending | To map |
-| E11 Reporting | In revision (TRIPOD+AI done) | In the same manuscript | Pending | To map |
-
-The dataset for the neonatal module is not MIMIC-IV and is not available yet. The neonatal manuscript (a stacked ensemble on 20,982 neonatal admissions) uses interquartile-range outlier removal and skewness-driven imputation in its preprocessing. Mapping it to E6 and E8 would show whether those steps were fitted inside the training folds, which the abstract does not say; that has to be checked before any claim.
-
-## 8. Folder skeleton
-
-Proposed common skeleton, with where each project stands today. The split follows the three layers.
-
-| Proposed | Holds | Maternal project today | This project today |
-|---|---|---|---|
-| `method/` | Notebooks and code that read the contract table: validation, stacking, metrics, sensitivity, reporting | `notebooks/`, `libraries/functions.py` | `notebooks/` (exploratory, to be rebuilt) |
-| `adapters/<dataset>/` | SQL or code that produces the contract table from one dataset | `sql/01_load_mimic_iv_schema/`, `02_cohort_mortality/`, `03_cohort_smm/`, the base of `04_labels/`, `05_predictors/` | Uses the maternal tables; new `sql/00_mimic_layer/` |
-| `outcomes/<outcome>/` | Outcome card, code catalogue, label script, sensitivity set | `04_labels/` | `sql/01_labels/` |
-| `audit/<outcome>/` | Count audit scripts and write-up | `06_audit_counts/`, `revision_audit_counts.md` | `sql/02_audit_counts/`, `count_audit.md` |
-| `docs/` | Plan, TRIPOD+AI, code lists, strategy sheets (E10) | `analysis_plan_notebooks.md`, `docs/` | `analysis_plan.md`, workbook |
-
-## 9. Open design decisions for the framework
-
-| ID | Decision | Options | Recommendation |
-|---|---|---|---|
-| FD1 | Where the method layer lives | The maternal repository stays the home of the shared code and the others depend on it (today); one monorepo with method, adapters and outcomes; a separate method repository | Keep the first option while the maternal manuscript is in revision; move to a monorepo after publication |
-| FD2 | Outcome configuration | One file per outcome (population, label table, prediction point, window, expected counts, thresholds) read by the audit scripts and notebooks; values written inside each script | One file per outcome |
-| FD3 | Unit-of-analysis columns | A table per dataset adapter with no outcome columns; columns inside each outcome's label table | A table per adapter, without outcome columns, joined to the label table in the audit; for MIMIC-IV `sql/00_mimic_layer/01_unit_of_analysis.sql` |
-| FD4 | Names | A common pattern for outcome identifiers, `*_v2` suffix and `<outcome>_label_v2` tables | Adopt the pattern already used (`fetal_death_label_v2`) |
-| FD5 | Neonatal | The dataset is not MIMIC-IV and is not available yet; it defines the adapter, the group identifier (mother or newborn) and whether E4 applies | Decide when the dataset arrives; the contract is written so that nothing in E7 to E11 depends on that choice |
-| FD6 | Contract format | A written specification only; or a specification plus a check script that validates any adapter's table (required columns, types, one row per unit, expected counts) | Specification plus check script |
-
-## 10. What this means for T17
-
-T17 is the MIMIC-IV adapter of stage E4. The unit-of-analysis columns (admission rank within the patient, days since the previous admission, first admission, pregnancy chain at 30, 90 and 180 days) do not depend on the outcome, so they become a table with no outcome columns, `unit_of_analysis_v2`, written in `sql/00_mimic_layer/01_unit_of_analysis.sql` and valid only for MIMIC-IV. The event counts per unit (already measured in Q-C4) come from joining it with `fetal_death_label_v2` in the audit, and the same table serves severe maternal morbidity. Another dataset will need its own table with the same contract columns (section 3.1).
-
-## 11. Fit with the thesis title
-
-Title: *Framework for the construction of predictive models that support the formulation of prevention strategies and action plans in health entities against maternal, perinatal and neonatal deaths.*
-
-| Element of the title | Where the framework covers it | What is missing |
-|---|---|---|
-| Framework for building predictive models | E0 to E9 and E11 | Nothing at this level |
-| Maternal, perinatal and neonatal deaths | Outcome module with three slots; the outcome ladder explains why maternal death is a feasibility analysis and severe morbidity the modelled proxy | Neonatal mapping; the thesis must say plainly which outcomes are modelled deaths and which are proxies |
-| Prevention strategies and action plans | E10 (proposed) | Not yet applied to any outcome |
-| In health entities | E10 items 5 and 6: local validation and monitoring, through a data adapter written for the entity's data | No local data yet; MIMIC-IV is a single US hospital |
-
-A framework drawn from two cases is a generalisation, not yet a validation; the neonatal case would be the third test.
+The open design decisions FD1 to FD6 of version 0.1 still apply (section 9 of the backup). FD1 is settled for now: the maternal repository is frozen while the article is under review, so this repository holds its own copy of the method and cites the maternal repository.
 
 *Confidential: internal use of the research project.*

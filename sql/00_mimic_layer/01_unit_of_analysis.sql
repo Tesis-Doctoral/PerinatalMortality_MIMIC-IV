@@ -1,6 +1,6 @@
 -- ============================================================================
 -- 00_mimic_layer / 01_unit_of_analysis.sql
--- MIMIC-IV adapter of framework stage E4 (unit of analysis and overlap) -- plan v2, task T17
+-- MIMIC-IV adapter of framework stage S5 (unit of analysis and overlap) -- plan v2, task T17
 -- ============================================================================
 -- Purpose: build mimiciv.unit_of_analysis_v2, ONE ROW PER ADMISSION of the revised obstetric
 --   universe (mimiciv.cohort_obstetric_v2), with everything the method layer needs to define the
@@ -9,7 +9,7 @@
 --   The same table serves the fetal-death (perinatal) model and the maternal models; the outcome
 --   modules (for example 01_labels/02_fetal_death_label_by_admission.sql) join to it by hadm_id.
 --
--- Data contract of the framework (framework.md, section 3.1) -> columns of this table:
+-- Data contract of the framework (framework.md, section 2) -> columns of this table:
 --   unit_id    = hadm_id                      (one record = one hospital admission)
 --   group_id   = subject_id                   (all validation splits are grouped by patient)
 --   t0         = admittime                    (time zero, decision D7)
