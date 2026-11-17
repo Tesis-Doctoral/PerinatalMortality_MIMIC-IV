@@ -31,7 +31,7 @@ Version 1, 2026-11-17. Card of the second application of the staged framework ([
 | Prediction point | Admission + 6 hours; 12 h, 24 h and retrospective classification as sensitivities | D6 |
 | Window | From 24 h before admission to the prediction point | D7 |
 | Excluded | Same-admission diagnoses, procedures, DRG codes and treatments (main model) | D9 (proposed) |
-| Candidate predictors | **Pending (group F, tasks T22–T25; D10).** Blocks: registration variables and age, history from earlier admissions, blood count and chemistry in the window, outpatient measurements (OMR), each with a missingness indicator | analysis plan |
+| Candidate predictors | **Pending (group F, tasks T23–T25; D10).** Blocks: registration variables and age, history from earlier admissions, blood count and chemistry in the window, outpatient measurements (OMR), each with a missingness indicator | analysis plan |
 | Candidate parameters | **Pending.** Count every category and every missingness indicator | — |
 
 ## 4. Sample size and learner (G3, S8)
@@ -74,8 +74,8 @@ SA1 to SA11 of [`../analysis_plan.md`](../analysis_plan.md), section 7 (renamed 
 ## 8. Next tasks, in the order the gates need them
 
 1. Run T17 (`unit_of_analysis_v2`) and Q-C5 (T13). → S5.
-2. New task: timing classes of the fetal-death events from the proxies of section 5, and the decision on C1 and C2. → S3, G1.
-3. Group F of the count audit (T22–T25) and decisions D9, D10. → S7.
+2. Task T45 (`sql/02_audit_counts/audit_counts_event_timing.sql`, group G): timing classes of the fetal-death events from the proxies of section 5, and the decision on C1 and C2. → S3, G1.
+3. Group F of the count audit (T23–T25) and decisions D9, D10. → S7.
 4. Count the candidate parameters, fix the reduced predictor set and record the primary learner. → before G3.
 5. Sample-size check with the observed Cox-Snell R² (D12). → G3.
 

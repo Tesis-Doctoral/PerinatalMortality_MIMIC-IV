@@ -109,7 +109,7 @@ Al 17/11/2026. La ficha del desenlace perinatal es [`docs/outcome_card_fetal_dea
 | E1 Gobierno | Hecho | En curso: D9–D14 abiertas | `analysis_plan_es.md`, Excel de seguimiento (local) |
 | E2 Universo y población | Hecho | Hecho (D1, D3) | `cohort_obstetric_v2`, `hadm_delivery_v2` del proyecto materno |
 | E3 Definición del desenlace | Hecho | Lista de códigos y etiqueta hechas (T15, T16); **momento del evento pendiente** | `sql/01_labels/` |
-| E4 Auditoría de conteos | Hecho | Grupos A–E hechos; grupo F pendiente (T22–T25) | `sql/02_audit_counts/`, `count_audit_es.md` |
+| E4 Auditoría de conteos | Hecho | Grupos A–E hechos; grupo F pendiente (T23–T25) | `sql/02_audit_counts/`, `count_audit_es.md` |
 | P1 Definición | Pasada | Pendiente: necesita las clases temporales de E3 | |
 | E5 Unidad y solapamiento | Hecho | Decidida (D4); tabla escrita, sin correr (T17); Q-C5 pendiente (T13) | `sql/00_mimic_layer/01_unit_of_analysis_es.sql` |
 | E6 Punto de predicción y ventana | Hecho (24 h) | Decidido (D6–D8: ingreso + 6 h) | |

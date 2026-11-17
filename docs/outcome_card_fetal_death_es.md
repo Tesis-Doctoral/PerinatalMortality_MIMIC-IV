@@ -31,7 +31,7 @@ Versión 1, 17/11/2026. Ficha de la segunda aplicación del framework por etapas
 | Punto de predicción | Ingreso + 6 horas; 12 h, 24 h y clasificación retrospectiva como sensibilidad | D6 |
 | Ventana | Desde 24 h antes del ingreso hasta el punto de predicción | D7 |
 | Excluidos | Diagnósticos, procedimientos, códigos DRG y tratamientos de la misma admisión (modelo principal) | D9 (propuesta) |
-| Predictores candidatos | **Pendiente (grupo F, tareas T22–T25; D10).** Bloques: variables de registro y edad, antecedentes de admisiones anteriores, hemograma y química en la ventana, mediciones ambulatorias (OMR), cada uno con su indicador de faltante | plan de análisis |
+| Predictores candidatos | **Pendiente (grupo F, tareas T23–T25; D10).** Bloques: variables de registro y edad, antecedentes de admisiones anteriores, hemograma y química en la ventana, mediciones ambulatorias (OMR), cada uno con su indicador de faltante | plan de análisis |
 | Parámetros candidatos | **Pendiente.** Contar cada categoría y cada indicador de faltante | — |
 
 ## 4. Tamaño de muestra y modelo (P3, E8)
@@ -74,8 +74,8 @@ SA1 a SA11 de [`../analysis_plan_es.md`](../analysis_plan_es.md), sección 7 (re
 ## 8. Próximas tareas, en el orden en que las piden las puertas
 
 1. Ejecutar T17 (`unit_of_analysis_v2`) y Q-C5 (T13). → E5.
-2. Tarea nueva: clases temporales de los eventos de muerte fetal a partir de los proxies de la sección 5, y decisión sobre C1 y C2. → E3, P1.
-3. Grupo F de la auditoría de conteos (T22–T25) y decisiones D9, D10. → E7.
+2. Tarea T45 (`sql/02_audit_counts/audit_counts_event_timing_es.sql`, grupo G): clases temporales de los eventos de muerte fetal a partir de los proxies de la sección 5, y decisión sobre C1 y C2. → E3, P1.
+3. Grupo F de la auditoría de conteos (T23–T25) y decisiones D9, D10. → E7.
 4. Contar los parámetros candidatos, fijar el conjunto reducido de predictores y registrar el modelo principal. → antes de P3.
 5. Verificación del tamaño de muestra con el R² de Cox-Snell observado (D12). → P3.
 

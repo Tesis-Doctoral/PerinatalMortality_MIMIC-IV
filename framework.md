@@ -109,7 +109,7 @@ As of 2026-11-17. The perinatal outcome card is [`docs/outcome_card_fetal_death.
 | S1 Governance | Done | In progress: D9–D14 open | `analysis_plan.md`, tracking workbook (local) |
 | S2 Universe and population | Done | Done (D1, D3) | maternal `cohort_obstetric_v2`, `hadm_delivery_v2` |
 | S3 Outcome definition | Done | Code list and label done (T15, T16); **event timing pending** | `sql/01_labels/` |
-| S4 Count audit | Done | Groups A–E done; group F pending (T22–T25) | `sql/02_audit_counts/`, `count_audit.md` |
+| S4 Count audit | Done | Groups A–E done; group F pending (T23–T25) | `sql/02_audit_counts/`, `count_audit.md` |
 | G1 Definition | Passed | Pending: needs the timing classes of S3 | |
 | S5 Unit and overlap | Done | Decided (D4); table written, not run (T17); Q-C5 pending (T13) | `sql/00_mimic_layer/01_unit_of_analysis.sql` |
 | S6 Prediction point and window | Done (24 h) | Decided (D6–D8: admission + 6 h) | |
