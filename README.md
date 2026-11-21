@@ -1,5 +1,7 @@
 # Perinatal Death (Fetal Component) Models in MIMIC-IV
 
+> **Framework.** This repository applies the thesis's staged framework for clinical prediction models. The framework (stages, gates, criteria and literature) and the catalogue of models with their status are in [StagedFramework_ClinicalPrediction](https://github.com/khem777/StagedFramework_ClinicalPrediction).
+
 Prediction models for **perinatal death** in obstetric admissions of MIMIC-IV, starting with the **fetal-death component** identified from the mother's ICD codes (the "Modelo C" of the thesis). This project is the continuation of the earlier exploratory work done inside `MaternalMortality_MIMIC-IV`, which is kept in [`legacy/`](legacy/) as a reference.
 
 > **Status: migration finished; the new SQL scripts are being run one by one.** Run so far: the verified code table (T15), the count audit (T08, T20) and the label by admission (T16). Written and waiting to be run: the unit of analysis (T17). The four migrated scripts in `sql/`, the dataset queries in `libraries/database.py` and the modelling notebook have not been run in their new location.
