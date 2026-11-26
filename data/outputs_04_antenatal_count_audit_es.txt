@@ -1,0 +1,142 @@
+Notebook 04 (R3, E2, E3, P1, E4), muerte fetal MIMIC-IV, punto de predicción prenatal; solo salida agregada
+
+== Q-U1 Conteos de referencia
+   admisiones obstétricas  pacientes  hospitalizaciones de parto  con código de mortinato  población
+1                   25736      15084                       19425                      124      19440
+
+== Q-U2 Población según evidencia y era
+       era CIE  partos  código de mortinato sin marca de parto
+1  solo CIE-10    8883                                      10
+2   solo CIE-9   10542                                       5
+
+== Q-L1 Patrones de código por nivel
+      nivel  versión CIE patrones
+1  excluido            9       <5
+2  excluido           10       <5
+3   parcial            9       <5
+4   parcial           10       <5
+5  estricto            9       <5
+6  estricto           10       <5
+
+== Q-L3 Tamaño de cada definición de la etiqueta
+   principal (estricta)  estricta + parcial  estricta sin código de pérdida temprana  22 semanas o más  28 semanas o más  estrictos sin semanas  estrictos con código del registro del recién nacido
+1                   129                 142                                      119                55                37                     61                                                    0
+
+== P1 · Conteos de referencia
+                                              conteo  cargado  esperado    resultado
+1                             admisiones obstétricas    25736     25736  reproducido
+2                             pacientes del universo    15084     15084  reproducido
+3                         hospitalizaciones de parto    19425     19425  reproducido
+4   población (marca de parto o código de mortinato)    19440     19440  reproducido
+5                              población: admisiones    19440     19440  reproducido
+6                               población: pacientes    13735     13735  reproducido
+7             eventos estrictos (etiqueta principal)      129       129  reproducido
+8                      eventos con códigos parciales      142       142  reproducido
+9   eventos estrictos sin código de pérdida temprana      119       119  reproducido
+10            eventos estrictos con 22 semanas o más       55        55  reproducido
+11            eventos estrictos con 28 semanas o más       37        37  reproducido
+
+== P1 · Puerta de definición
+                                                       revisión resultado      decisión
+1  población, unidad y desenlace del notebook 01, reconstruidos      pasa  se pasa a E4
+
+== Q-A0 Verificación de la población
+   admisiones  pacientes  estrictos  eventos con parciales
+1       19440      13735        129                    142
+
+== Q-A1 Información disponible antes del ingreso
+   margen (días)                  grupo  admisiones  alguna información  % con información  hospitalización anterior  hospitalización obstétrica anterior  mediciones ambulatorias  laboratorios ambulatorios
+1              1      1 evento estricto         129                 100               77.5                        50                                   48                       87                         80
+2              1  2 evento solo parcial          13                  11               84.6                         7                                    7                       10                         10
+3              1            3 no evento       19298               17174               89.0                      8508                                 7592                    14192                      14102
+4              7      1 evento estricto         129                  99               76.7                        49                                   47                       86                         79
+5              7  2 evento solo parcial          13                  11               84.6                         7                                    7                       10                         10
+6              7            3 no evento       19298               17056               88.4                      8369                                 7438                    14151                      13965
+7             30      1 evento estricto         129                  97               75.2                        47                                   44                       84                         78
+8             30  2 evento solo parcial          13                  11               84.6                         7                                    7                       10                         10
+9             30            3 no evento       19298               16811               87.1                      8031                                 7059                    14004                      13721
+
+== Q-A2 Información según el período (7 días)
+       era CIE grupo de año ancla admisiones  alguna información  estrictos estrictos con información
+1  solo CIE-10        2008 - 2010       1533                1497         12                        12
+2  solo CIE-10        2011 - 2013       1512                1480         10                        10
+3  solo CIE-10        2014 - 2016       2561                2342         16                        15
+4  solo CIE-10        2017 - 2019       2353                2009         22                        11
+5  solo CIE-10        2020 - 2022        934                 765         11                         9
+6   solo CIE-9        2008 - 2010       6700                5910         34                        30
+7   solo CIE-9        2011 - 2013       2826                2417         17                         9
+8   solo CIE-9        2014 - 2016       1020                 746          7                        <5
+9   solo CIE-9        2017 - 2019         <5                   0          0                         0
+
+== Q-A3 Admisiones anteriores (7 días)
+                   grupo  admisiones  ninguna   una dos o tres  cuatro o más última hace ≤ 90 días 91 a 365 días más de 1 año
+1      1 evento estricto         129       80    22         20             7                    12            <5           34
+2  2 evento solo parcial          13        6    <5         <5             0                    <5             0           <5
+3            3 no evento       19298    10929  5156       2636           577                  1513           870         5986
+4                    NaN       19440    11015  5181       2660           584                  1528           873         6024
+
+== Q-A4 Antecedentes en admisiones anteriores (7 días)
+                                       antecedente  admisiones  % de la población  % de las que tienen historia
+1                         01 muerte fetal anterior          52               0.27                          0.62
+2                              02 cesárea anterior        1670               8.59                         19.82
+3                     03 parto pretérmino anterior         419               2.16                          4.97
+4   04 trastorno hipertensivo en embarazo anterior         989               5.09                         11.74
+5                 05 diabetes gestacional anterior         418               2.15                          4.96
+6                          06 hipertensión crónica         472               2.43                          5.60
+7                       07 diabetes pregestacional         267               1.37                          3.17
+8                             08 obesidad (código)         669               3.44                          7.94
+9                      09 enfermedad renal crónica          27               0.14                          0.32
+10                          10 enfermedad tiroidea         728               3.74                          8.64
+11         11 lupus, antifosfolípido o trombofilia          91               0.47                          1.08
+12                     12 tabaco, alcohol o drogas         457               2.35                          5.42
+13                                13 VIH o sífilis          30               0.15                          0.36
+
+== Q-A5 Mediciones ambulatorias (7 días)
+                            medición  admisiones con valor  % de la población valor en el último año  mediana de días antes del ingreso
+1                       Weight (Lbs)                 13586               69.9                  11124                               13.0
+2                     Blood Pressure                 13267               68.2                  12161                               12.0
+3                        BMI (kg/m2)                 10195               52.4                   7950                               14.0
+4                    Height (Inches)                  9227               47.5                   5368                              267.0
+5                                BMI                   757                3.9                    730                               62.0
+6                             Weight                   124                0.6                    110                               85.0
+7             Blood Pressure Sitting                    66                0.3                     29                              518.0
+8    Blood Pressure Standing (1 min)                    52                0.3                     22                              518.0
+9               Blood Pressure Lying                    49                0.3                     19                              532.0
+10           Blood Pressure Standing                    10                0.1                     <5                             1139.0
+11  Blood Pressure Standing (3 mins)                     7                0.0                     <5                              305.0
+12                            Height                     6                0.0                      6                              207.0
+
+== Q-A6 Laboratorios ambulatorios (7 días)
+                          examen  admisiones con valor  % de la población  valor en el último año  mediana de días antes del ingreso
+1          cualquier otro examen                 14054               72.3                   12471                               59.0
+2                     creatinina                  9790               50.4                    6460                              200.0
+3                    hemoglobina                 13453               69.2                   11669                               85.0
+4  hemoglobina glicosilada (A1c)                  3349               17.2                    2076                              239.0
+
+== Q-A7 Variables de registro
+   admisiones  estado civil faltante  seguro faltante u otro  idioma faltante  raza o etnia desconocida
+1       19440                    385                     441               30                       928
+
+== E4 · Factibilidad y predictores
+                                                      revisión                                                                        resultado                                                                                                               decisión
+1  eventos estrictos con alguna información (margen de 7 días)                                                                99 de 129 (76.7%)                                                                                                  el modelo es factible
+2         no eventos con alguna información (margen de 7 días)                                                                            88.4%                                   cada bloque lleva un indicador: no tener registro no significa no tener la condición
+3                                      márgenes de 1 y 30 días                                                   casi la misma cobertura (Q-A1)                                                                        7 días principal; 1 y 30 días como sensibilidad
+4                                 admisiones anteriores (Q-A3)                             la mayoría hace más de un año (embarazos anteriores)                                             dos indicadores: alguna admisión anterior; admisión en los 90 días previos
+5                 antecedentes en admisiones anteriores (Q-A4)                                los frecuentes solos; los raros en dos compuestos                                                          9 parámetros de antecedentes (ficha del desenlace, sección 4)
+6                               mediciones ambulatorias (Q-A5)   cerca del 70% con peso y presión arterial, una mediana de unas 2 semanas antes  última sistólica y diastólica, alguna presión de 140/90 o más, último índice de masa corporal (de 280 a 7 días antes)
+7                             laboratorios ambulatorios (Q-A6)  hemoglobina en cerca del 70%; creatinina antigua; A1c pedida de forma selectiva                                          solo la última hemoglobina; un indicador de control prenatal en este hospital
+8                                 variables de registro (Q-A7)                                                                   casi completas                              edad, raza y etnia, seguro, idioma, estado civil; tipo y lugar de admisión excluidos (P2)
+9                                        parámetros candidatos                                                                               27                                            conjunto reducido de 17 fijado antes de cualquier modelo, para la puerta P3
+
+== Resumen del notebook
+                                                                                                                                            valor
+indicador                                                                                                                                        
+retorno usado                                                 R3: punto de predicción prenatal (información de al menos 7 días antes del ingreso)
+población / eventos estrictos                                                                                                        19,440 / 129
+puerta P1                                                                                                                                    pasa
+eventos estrictos con información antes del ingreso (7 días)                                                                    99 de 129 (76.7%)
+no eventos con información antes del ingreso (7 días)                                                                                       88.4%
+factibilidad                                                                                                                             factible
+parámetros candidatos                                                                                                  27 (conjunto reducido: 17)
+paso siguiente                                                                  tabla de predictores, unidad y fuga (E5, E6, E7, P2), notebook 05

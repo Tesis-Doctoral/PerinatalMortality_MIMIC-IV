@@ -1,0 +1,189 @@
+Notebook 03 (S5, S6, return R3), fetal death MIMIC-IV (M3); aggregate output only
+
+== Q-T17a integrity
+   n_rows  n_units  n_patients  n_delivery_hosp  n_first_admission  n_universe  n_time_missing n_negative_los  n_end_before_6h
+1   25736    25736       15084            19425              15084       25736               0             <5              365
+
+== Q-T17b pregnancy chains
+   gap_limit  n_chains  n_chains_with_2plus_adm  max_adm_in_chain  n_chains_with_2plus_deliveries
+1         30     23257                     2034                 9                              20
+2         90     22080                     2787                11                              29
+3        180     21485                     3202                11                              31
+
+== Q-T17c gap to the previous admission
+          gap_to_previous_admission  n_admissions n_events
+1  0 first admission of the patient         15084       93
+2                   1 under 90 days          3649       21
+3                     2 90-179 days           595       <5
+4                    3 180-364 days           415       <5
+5                4 365 days or more          5993       37
+
+== Q-T17d gap to an earlier event admission
+           gap_to_earlier_event  n_admissions n_events
+1  0 no earlier event admission         25626      148
+2               1 under 90 days            17        5
+3                3 180-364 days            15        0
+4            4 365 days or more            78       <5
+
+== Q-T17e consistency with the label table
+   n_unit_only  n_label_only  n_mismatch_d8_flag  n_mismatch_icd_era  n_mismatch_anchor  n_mismatch_delivery  n_mismatch_los_hours
+1            0             0                   0                   0                  0                    0                     0
+
+== Q-T17f overlaps and ties
+   n_with_previous  n_starts_before_previous_ends  n_same_admittime_as_previous
+1            10652                              7                             0
+
+== Q-T17g prediction point inside the admission
+  is_delivery_v2  n_admissions n_end_before_6h  mean_los_hours  median_los_hours  mean_adm_per_patient
+1          False          6311             362            63.5              39.8                  3.22
+2           True         19425              <5            90.5              70.8                  2.09
+3           None         25736             365            83.8              66.4                  2.37
+
+== S5 · Unit of analysis: reference counts
+                                                                                             count  loaded  expected      result
+1                                                               units (admissions of the universe)   25736     25736  reproduced
+2                                                                                         patients   15084     15084  reproduced
+3                                                                        delivery hospitalizations   19425     19425  reproduced
+4                                                               first admissions (one per patient)   15084     15084  reproduced
+5                                                                        pregnancy chains, 30 days   23257     23257  reproduced
+6                                                                        pregnancy chains, 90 days   22080     22080  reproduced
+7                                                                       pregnancy chains, 180 days   21485     21485  reproduced
+8                                           admissions only in one of the two tables (unit, label)       0         0  reproduced
+9  mismatches with the label table (D8 flag, ICD era, anchor group, delivery flag, length of stay)       0         0  reproduced
+
+== S5 · Decision D4: unit of analysis
+                review                   result                                                 decision
+1               record    one row per admission  one record per delivery hospitalization (population D3)
+2             grouping          15,084 patients             every validation split is grouped by patient
+3       same pregnancy  90-day pregnancy chains                                     sensitivity analysis
+4  checks of the table               reproduced                                                 on to S6
+
+== Q-E0 population check
+   n_population  n_events_strict_or_partial  n_events_strict  n_delivery_flag  n_strict_delivery_flag
+1         19440                         142              129            19425                     114
+
+== Q-E1 length of stay
+               ev_group  n_admissions  n_los_missing_or_not_positive  p05_hours  p25_hours  median_hours  p75_hours  p95_hours  n_under_12h  n_12_to_24h n_24_to_48h  n_48h_or_more
+1        1 strict event           129                              0       18.6       36.7          54.4       87.8      226.1            5           12          37             75
+2  2 partial-only event            13                              0       28.4       61.3          77.1       98.9      159.8            0            0          <5             10
+3           3 non-event         19298                              0       44.7       58.1          71.0      100.5      159.4            7           21        1497          17773
+4                   NaN         19440                              0       44.5       57.9          70.8      100.5      160.1           12           33        1537          17858
+
+== Q-E2 eligibility at 24 hours
+                                                 scope  n_admissions  n_eligible n_died_before_24h  n_discharged_before_24h  n_events  n_events_lost  n_strict  n_strict_lost  pct_strict_lost
+1  Population of D3 (delivery flag or stillbirth code)         19440       19395                <5                       44       142             17       129             17             13.2
+2                                  Delivery flag alone         19425       19383                <5                       41       127             14       114             14             12.3
+3                              Any obstetric admission         25736       23625                 5                     2106       154             20       136             20             14.7
+
+== Q-E2b remaining at other prediction points
+   hours_after_admission  n_remaining  n_events_remaining  n_strict_remaining  pct_strict_retained
+1                      0        19440                 142                 129                100.0
+2                      6        19437                 142                 129                100.0
+3                     12        19428                 137                 124                 96.1
+4                     24        19395                 125                 112                 86.8
+5                     36        19144                 108                  97                 75.2
+6                     48        17858                  85                  75                 58.1
+
+== Q-E3a ED registration before admission
+               ev_group  n_admissions  n_with_ed_registration  median_hours_before_admission  p95_hours_before_admission  n_ed_more_than_24h_before n_ed_after_admission_time
+1        1 strict event           129                      20                            3.4                        12.8                          0                         0
+2  2 partial-only event            13                       0                            NaN                         NaN                          0                         0
+3           3 non-event         19298                     427                            2.6                        14.8                          0                        <5
+4                   NaN         19440                     447                            2.6                        14.8                          0                        <5
+
+== Q-E3b first laboratory value
+               ev_group  n_admissions n_without_laboratory_value  p05_hours  median_hours  p95_hours  n_first_lab_before_admission n_first_lab_after_24h
+1        1 strict event           129                         25       -7.5           0.0        3.3                            52                    <5
+2  2 partial-only event            13                         <5       -7.2          -0.8        1.2                             8                     0
+3           3 non-event         19298                       3418       -7.8           0.1        5.0                          7544                    71
+4                   NaN         19440                       3445       -7.8           0.1        4.9                          7604                    72
+
+== Q-E3c first ICU admission
+               ev_group  n_admissions  n_with_icu_stay  n_icu_in_first_24h  median_hours_to_icu  p95_hours_to_icu
+1        1 strict event           129                8                   5                 11.1             247.4
+2  2 partial-only event            13                0                   0                  NaN               NaN
+3           3 non-event         19298              197                 110                 20.6             422.5
+4                   NaN         19440              205                 115                 19.9             417.5
+
+== Q-E4 delivery and induction procedure dates
+               ev_group  n_admissions n_no_delivery_procedure  n_delivery_before_admission_date  n_delivery_day_0  n_delivery_day_1 n_delivery_day_2_or_later n_with_induction_procedure n_induction_day_0 n_induction_day_1_or_later
+1        1 strict event           129                      21                                 0                36                51                        21                         43                14                         29
+2  2 partial-only event            13                      <5                                 0                 5                 5                        <5                         <5                <5                         <5
+3           3 non-event         19298                    4293                                21              8551              4733                      1700                       6770              4602                       2113
+4                   NaN         19440                    4315                                21              8592              4789                      1723                       6817              4619                       2143
+
+== S6 · Decisions D6, D7 and D8: prediction point
+                                                     review                                                                result                                                                              decision
+1                      strict events lost at 6, 12 and 24 h                                                    0, 5 and 17 of 129                 D6: prediction point = admission + 6 h (12 h and 24 h as sensitivity)
+2  first laboratory value and emergency registration (Q-E3)  around the admission time; registration a median of about 3 h before  D7: time zero = admission; window from 24 h before admission to the prediction point
+3                            admissions that end before 6 h                                                         3 (events: 0)                                                       D8: excluded and reported apart
+
+== Q-G0 population check
+   n_admissions  n_strict  n_events_any
+1         19437       129           142
+
+== Q-G1 untimed proxies (strict events)
+       icd_era                     code_family n_events n_principal_dx n_with_ed_registration
+1  ICD-10 only  1 intrauterine death code only       <5              0                      0
+2  ICD-10 only  2 stillbirth outcome code only       27              0                      9
+3  ICD-10 only                 3 both families       43             38                      5
+4  ICD-10 only                             NaN       71             38                     14
+5   ICD-9 only  1 intrauterine death code only       <5             <5                      0
+6   ICD-9 only  2 stillbirth outcome code only       20              0                     <5
+7   ICD-9 only                 3 both families       34             26                     <5
+8   ICD-9 only                             NaN       58             27                      6
+9          NaN                             NaN      129             65                     20
+
+== Q-G2 candidate work-up laboratory items
+   itemid             label             fluid    category  n_strict_events_with_item  n_non_events_with_item
+1   51212  Fetal Hemoglobin             Blood  Hematology                         57                     132
+2   52351         Fetal Hgb  Other Body Fluid  Hematology                          0                       0
+
+== Q-G3 first work-up laboratory value relative to T
+   itemid             label              ev_group n_admissions_with_value  n_by_t n_t_to_24h n_after_24h  median_hours_from_admission
+1   51212  Fetal Hemoglobin        1 strict event                      57      49         <5          <5                          1.6
+2   51212  Fetal Hemoglobin  2 partial-only event                      <5       0         <5           0                          7.7
+3   51212  Fetal Hemoglobin           3 non-event                     132      37         60          35                         12.2
+
+== Q-G4 mifepristone and misoprostol
+               ev_group  n_admissions  n_mifepristone  n_mifepristone_by_t  n_misoprostol n_misoprostol_by_t median_hours_to_mifepristone
+1        1 strict event           129               0                    0              6                 <5                         None
+2  2 partial-only event            13               0                    0              0                  0                         None
+3           3 non-event         19295               0                    0            468                 46                         None
+4                   NaN         19437               0                    0            474                 47                         None
+
+== Q-G5 proxies in events and non-events
+               ev_group  n_admissions  n_p1_intrauterine_code  n_p2_principal_dx  n_p3_lab_by_t n_p3_lab_after_t  n_p4_mifepristone_by_t n_p4_misoprostol_by_t  n_p5_delivery_day0
+1        1 strict event           129                      82                 65             49                8                       0                    <5                  36
+2  2 partial-only event            13                       0                  0              0               <5                       0                     0                   5
+3           3 non-event         19295                       0                  0             37               95                       0                    46                8550
+
+== Q-G6 candidate timing classes (strict events)
+                 timing_class  n_events n_icd10 n_with_early_loss_code n_22_weeks_or_more n_work_up_only_after_t
+1       1 present at T, timed        49      29                     <5                 26                      0
+2     2 present at T, by code        24      14                      0                 14                     <5
+3  3 antepartum, time unknown        14      <5                      0                 <5                     <5
+4             4 indeterminate        42      24                      7                 13                      5
+5                         NaN       129      71                     10                 55                      8
+
+== S6 · Events already present at the prediction point: reference counts (catalogue of models)
+                                                                             count  loaded  expected      result
+1  strict events already present at the prediction point (classes 1 and 2 of Q-G6)      73        73  reproduced
+2                                            strict events at the prediction point     129       129  reproduced
+
+== S6 · Decision: what can be predicted at admission + 6 h
+                                                  review               result                                                                 decision
+1  strict events already present at the prediction point    73 of 129 (56.6%)       more than half: a model at admission + 6 h would fail criterion C1
+2                               model at admission + 6 h           not fitted  return R3 (another prediction point): antenatal prediction, notebook 04
+3                                           returns used  R3 (1 of 2 allowed)                                                                        —
+
+== Notebook summary
+                                                                                                     value
+indicator                                                                                                 
+unit of analysis (D4)                             delivery hospitalization; every split grouped by patient
+checks of the unit table                                                                        reproduced
+prediction point (D6)                                                                      admission + 6 h
+strict events lost at 24 h                                                                       17 of 129
+strict events already present at admission + 6 h                                         73 of 129 (56.6%)
+model at admission + 6 h                                 not fitted: criterion C1 anticipated by the audit
+next step                                               return R3: antenatal prediction point, notebook 04

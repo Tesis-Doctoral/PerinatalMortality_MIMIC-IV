@@ -1,0 +1,180 @@
+Notebook 01 (E1, E2, E3, P1), muerte fetal MIMIC-IV (M3); solo salida agregada
+
+== E1 · Configuración de este repositorio
+                           ítem                                                                                                                                                 valor       estado
+1               fuente de datos                                           MIMIC-IV v3.1 (PhysioNet), Beth Israel Deaconess Medical Center, 2008-2022; fechas desplazadas por paciente         fijo
+2                 base de datos                                                         copia local de MIMIC-IV en PostgreSQL (esquema mimiciv); credenciales en .env (no versionado)           ok
+3   cohorte obstétrica revisada                                                                             cohort_obstetric_v2, hadm_delivery_v2, obstetric_dx_v2, predictors_24h_v2           ok
+4              uso de los datos  Acuerdo de uso de datos con credenciales de PhysioNet y curso CITI: solo investigación; sin reidentificación; datos no compartidos ni redistribuidos        regla
+5          regla de publicación                               solo salidas agregadas (data/outputs_*.txt); conteos de 1 a 4 como <5 (D13); no se publica ningún subject_id ni hadm_id        regla
+6             semilla aleatoria                                                                                                                          20261119 (notebooks 05 y 06)         fijo
+7         conteos de referencia                                       fijados en la auditoría de conteos (count_audit_es.md) y reproducidos por la puerta P1 en los notebooks 01 y 04         fijo
+8                        python                                                                                                                                                3.11.9  información
+9                        pandas                                                                                                                                                 3.1.1           ok
+10                        numpy                                                                                                                                                 2.4.6           ok
+11                      sklearn                                                                                                                                                 1.9.1           ok
+12                        scipy                                                                                                                                                1.17.1           ok
+13                   sqlalchemy                                                                                                                                                 2.1.9           ok
+14                     psycopg2                                                                                                                          2.9.13 (dt dec pq3 ext lo64)           ok
+
+== E2 · Universo obstétrico y población del modelo
+   admisiones  pacientes  hospitalizaciones de parto  código de mortinato sin marca de parto  población  pacientes de la población
+1       25736      15084                       19425                                      15      19440                      13735
+
+== E2 · Decisión D3: población
+                                  revisión                              resultado                                                                                               decisión
+1                     población del modelo  19,440 admisiones de 13,735 pacientes                                         hospitalizaciones de parto (marca v2) o un código de mortinato
+2  códigos de mortinato sin marca de parto                          15 admisiones  se quedan en la población: la marca de parto las deja fuera porque también tienen un código de aborto
+3                    registro y agrupación                  una fila por admisión                      un registro por hospitalización de parto, agrupado por paciente (E5, notebook 03)
+
+== Q-T15a Patrones por nivel
+      nivel  versión CIE patrones
+1  excluido            9       <5
+2  excluido           10       <5
+3   parcial            9       <5
+4   parcial           10       <5
+5  estricto            9       <5
+6  estricto           10       <5
+
+== Q-T15b Admisiones por patrón
+       nivel  versión CIE patrón de código admisiones en toda la base en el universo obstétrico en la población D3
+1   excluido            9              632                         69                        69                 <5
+2   excluido           10             O021                         44                        44                  6
+3    parcial            9             V273                          7                         7                  7
+4    parcial           10             O312                         12                        12                  8
+5    parcial           10             Z373                          5                         5                 <5
+6   estricto            9             6564                         44                        44                 38
+7   estricto            9             V271                         47                        47                 47
+8   estricto            9             V274                          5                         5                  5
+9   estricto            9             V277                         <5                        <5                 <5
+10  estricto           10             O364                         45                        45                 44
+11  estricto           10             Z371                         66                        66                 66
+12  estricto           10             Z374                         <5                        <5                 <5
+
+== Q-T15c Códigos completos en el universo
+       nivel  versión CIE código CIE admisiones
+1    parcial            9       V273          7
+2    parcial           10    O3121X1         <5
+3    parcial           10    O3122X1         <5
+4    parcial           10    O3122X2         <5
+5    parcial           10    O3123X0         <5
+6    parcial           10    O3123X1          5
+7    parcial           10    O3123X2         <5
+8    parcial           10       Z373          5
+9   estricto            9      65641         38
+10  estricto            9      65643          6
+11  estricto            9       V271         47
+12  estricto            9       V274          5
+13  estricto            9       V277         <5
+14  estricto           10    O364XX0         44
+15  estricto           10    O364XX2         <5
+16  estricto           10       Z371         66
+17  estricto           10       Z374         <5
+
+== Q-T15e Familias excluidas en el universo
+                          familia  admisiones  también con código de evento  sin código de evento
+1  pérdida temprana (O02.1 / 632)         113                            11                   102
+
+== Q-T16b Eventos estrictos fuera de la población D3
+       era CIE código de muerte intrauterina código de desenlace de mortinato código 656.43 (anteparto)        siguiente admisión de parto eventos
+1  solo CIE-10                            Sí                               No                        No  4 sin admisión de parto posterior      <5
+2   solo CIE-9                            Sí                               No                        Sí                   2 de 8 a 90 días      <5
+3   solo CIE-9                            Sí                               No                        Sí                   3 más de 90 días      <5
+4   solo CIE-9                            Sí                               No                        Sí  4 sin admisión de parto posterior      <5
+
+== Q-T16c Eventos estrictos por familia de código
+       era CIE en la población D3                        familia de código eventos  con 656.43 (anteparto)
+1  solo CIE-10                 No     1 solo código de muerte intrauterina      <5                       0
+2  solo CIE-10                 Sí     1 solo código de muerte intrauterina      <5                       0
+3  solo CIE-10                 Sí  2 solo código de desenlace de mortinato      27                       0
+4  solo CIE-10                 Sí                         3 ambas familias      43                       0
+5   solo CIE-9                 No     1 solo código de muerte intrauterina       6                       6
+6   solo CIE-9                 Sí     1 solo código de muerte intrauterina      <5                       0
+7   solo CIE-9                 Sí  2 solo código de desenlace de mortinato      20                       0
+8   solo CIE-9                 Sí                         3 ambas familias      34                       0
+
+== Q-T16d Posición del código estricto
+                          familia de código                 posición eventos
+1      1 solo código de muerte intrauterina             1 posición 1      <5
+2      1 solo código de muerte intrauterina       2 posiciones 2 a 3      <5
+3      1 solo código de muerte intrauterina      3 posiciones 4 a 10      <5
+4      1 solo código de muerte intrauterina  4 posición 11 o después      <5
+5   2 solo código de desenlace de mortinato       2 posiciones 2 a 3      23
+6   2 solo código de desenlace de mortinato      3 posiciones 4 a 10      21
+7   2 solo código de desenlace de mortinato  4 posición 11 o después      <5
+8                          3 ambas familias             1 posición 1      64
+9                          3 ambas familias       2 posiciones 2 a 3      11
+10                         3 ambas familias      3 posiciones 4 a 10      <5
+11                         3 ambas familias  4 posición 11 o después      <5
+
+== Q-T16e Eventos con código de pérdida temprana
+   nivel del evento código de pérdida temprana código de aborto banda de semanas admisiones
+1      solo parcial                         No               No         28 o más          8
+2      solo parcial                         No               No      menos de 22         <5
+3      solo parcial                         No               No      desconocida         <5
+4          estricto                         No               No          22 a 27         17
+5          estricto                         No               No         28 o más         36
+6          estricto                         No               No      menos de 22          7
+7          estricto                         No               No      desconocida         54
+8          estricto                         No               Sí          22 a 27         <5
+9          estricto                         No               Sí         28 o más         <5
+10         estricto                         No               Sí      menos de 22         <5
+11         estricto                         No               Sí      desconocida         <5
+12         estricto                         Sí               Sí      menos de 22          5
+13         estricto                         Sí               Sí      desconocida          5
+
+== Q-T16f Tamaño de cada definición de la etiqueta
+                                  alcance  admisiones  principal (estricta)  estricta + parcial  estricta sin código de pérdida temprana  22 semanas o más estrictos sin semanas  28 semanas o más
+1                          1 población D3       19440                   129                 142                                      119                55                    61                37
+2  2 población D3, solo admisiones CIE-10        8893                    71                  80                                       65                55                    <5                37
+3         3 población D3, con semanas Z3A        8852                    68                  77                                       63                55                     0                37
+
+== Q-T16g D8: admisiones de menos de 6 h
+  nivel del evento  admisiones terminan antes de 6 h  estancia faltante
+1       sin evento       19298                    <5                  0
+2     solo parcial          13                     0                  0
+3         estricto         129                     0                  0
+
+== E3 · Decisión D5: definición del desenlace
+                                     revisión                             resultado                                                      decisión
+1                          etiqueta principal                 129 eventos estrictos  código estricto de muerte fetal a cualquier edad gestacional
+2             códigos estrictos más parciales                           142 eventos                                      análisis de sensibilidad
+3     estricta sin código de pérdida temprana                           119 eventos                                      análisis de sensibilidad
+4              22 semanas o más (solo CIE-10)                            55 eventos                                      análisis de sensibilidad
+5              28 semanas o más (solo CIE-10)                            37 eventos                                      análisis de sensibilidad
+6  eventos estrictos sin semanas de gestación                            61 eventos                                            se reportan aparte
+7                          momento del evento  ninguno: códigos de egreso sin fecha                      se mide con indicios en E6 (notebook 03)
+
+== P1 · Conteos de referencia de la auditoría de conteos
+                                                       conteo  cargado  esperado    resultado
+1                            universo: admisiones obstétricas    25736     25736  reproducido
+2                                         universo: pacientes    15084     15084  reproducido
+3                                  hospitalizaciones de parto    19425     19425  reproducido
+4                 tabla de etiqueta: filas (una por admisión)    25736     25736  reproducido
+5                     tabla de etiqueta: admisiones distintas    25736     25736  reproducido
+6                   eventos, estrictos o parciales (universo)      154       154  reproducido
+7                                eventos estrictos (universo)      136       136  reproducido
+8                           eventos solo parciales (universo)       18        18  reproducido
+9                                                población D3    19440     19440  reproducido
+10      población D3 (E2) = población de la tabla de etiqueta    19440     19440  reproducido
+11                                 eventos en la población D3      142       142  reproducido
+12  eventos estrictos en la población D3 (etiqueta principal)      129       129  reproducido
+13                 eventos estrictos fuera de la población D3        7         7  reproducido
+14                     eventos con código de pérdida temprana       11        11  reproducido
+15          catálogo verificado: eventos estrictos (universo)      136       136  reproducido
+16  catálogo verificado: eventos estrictos en la población D3      129       129  reproducido
+
+== P1 · Puerta de definición
+                                                     revisión resultado                                                                   decisión
+1  población, unidad y desenlace fijos; conteos reproducibles      pasa  la definición queda fija: se pasa a la auditoría de conteos (notebook 02)
+
+== Resumen del notebook
+                                                                                                     valor
+indicador                                                                                                 
+población del modelo (D3)                                            19,440 admisiones de 13,735 pacientes
+etiqueta principal (D5)                       código estricto de muerte fetal a cualquier edad gestacional
+eventos estrictos en la población                                                              129 (0.66%)
+eventos con códigos parciales (sensibilidad)                                                           142
+momento del evento en los datos                                       ninguno: códigos de egreso sin fecha
+puerta P1                                                                                             pasa
+paso siguiente                                                      auditoría de conteos (E4), notebook 02

@@ -1,0 +1,142 @@
+Notebook 04 (R3, S2, S3, G1, S4), fetal death MIMIC-IV, antenatal prediction point; aggregate output only
+
+== Q-U1 reference counts
+   n_obstetric_admissions  n_patients  n_delivery_hospitalizations  n_with_stillbirth_code  n_population
+1                   25736       15084                        19425                     124         19440
+
+== Q-U2 population by evidence and era
+       icd_era  n_delivery  n_stillbirth_code_without_delivery_flag
+1  ICD-10 only        8883                                       10
+2   ICD-9 only       10542                                        5
+
+== Q-L1 code patterns by tier
+       tier  icd_version n_patterns
+1  excluded            9         <5
+2  excluded           10         <5
+3   partial            9         <5
+4   partial           10         <5
+5    strict            9         <5
+6    strict           10         <5
+
+== Q-L3 label sizes
+   n_main_strict  n_strict_plus_partial  n_strict_without_early_loss_code  n_ge22_weeks  n_ge28_weeks  n_strict_weeks_unknown  n_strict_with_newborn_record_code
+1            129                    142                               119            55            37                      61                                  0
+
+== G1 · Reference counts
+                                            count  loaded  expected      result
+1                            obstetric admissions   25736     25736  reproduced
+2                        patients of the universe   15084     15084  reproduced
+3                       delivery hospitalizations   19425     19425  reproduced
+4   population (delivery flag or stillbirth code)   19440     19440  reproduced
+5                          population: admissions   19440     19440  reproduced
+6                            population: patients   13735     13735  reproduced
+7                      strict events (main label)     129       129  reproduced
+8                       events with partial codes     142       142  reproduced
+9        strict events without an early-loss code     119       119  reproduced
+10            strict events with 22 weeks or more      55        55  reproduced
+11            strict events with 28 weeks or more      37        37  reproduced
+
+== G1 · Definition gate
+                                                 review  result  decision
+1  population, unit and outcome of notebook 01, rebuilt  passes  on to S4
+
+== Q-A0 population check
+   n_admissions  n_patients  n_strict  n_events_any
+1         19440       13735       129           142
+
+== Q-A1 information available before admission
+   buffer_days              ev_group  n_admissions  n_any_information  pct_any_information  n_prior_admission  n_prior_obstetric_admission  n_omr  n_outpatient_lab
+1            1        1 strict event           129                100                 77.5                 50                           48     87                80
+2            1  2 partial-only event            13                 11                 84.6                  7                            7     10                10
+3            1           3 non-event         19298              17174                 89.0               8508                         7592  14192             14102
+4            7        1 strict event           129                 99                 76.7                 49                           47     86                79
+5            7  2 partial-only event            13                 11                 84.6                  7                            7     10                10
+6            7           3 non-event         19298              17056                 88.4               8369                         7438  14151             13965
+7           30        1 strict event           129                 97                 75.2                 47                           44     84                78
+8           30  2 partial-only event            13                 11                 84.6                  7                            7     10                10
+9           30           3 non-event         19298              16811                 87.1               8031                         7059  14004             13721
+
+== Q-A2 information by period (7 days)
+       icd_era anchor_year_group n_admissions  n_any_information  n_strict n_strict_any_information
+1  ICD-10 only       2008 - 2010         1533               1497        12                       12
+2  ICD-10 only       2011 - 2013         1512               1480        10                       10
+3  ICD-10 only       2014 - 2016         2561               2342        16                       15
+4  ICD-10 only       2017 - 2019         2353               2009        22                       11
+5  ICD-10 only       2020 - 2022          934                765        11                        9
+6   ICD-9 only       2008 - 2010         6700               5910        34                       30
+7   ICD-9 only       2011 - 2013         2826               2417        17                        9
+8   ICD-9 only       2014 - 2016         1020                746         7                       <5
+9   ICD-9 only       2017 - 2019           <5                  0         0                        0
+
+== Q-A3 earlier admissions (7 days)
+               ev_group  n_admissions  n_none n_one n_two_to_three  n_four_or_more n_last_within_90_days n_last_91_to_365_days n_last_over_365_days
+1        1 strict event           129      80    22             20               7                    12                    <5                   34
+2  2 partial-only event            13       6    <5             <5               0                    <5                     0                   <5
+3           3 non-event         19298   10929  5156           2636             577                  1513                   870                 5986
+4                   NaN         19440   11015  5181           2660             584                  1528                   873                 6024
+
+== Q-A4 conditions in earlier admissions (7 days)
+                                        condition  n_admissions_with_condition  pct_of_population  pct_of_admissions_with_history
+1                          01 earlier fetal death                           52               0.27                            0.62
+2                             02 earlier cesarean                         1670               8.59                           19.82
+3                     03 earlier preterm delivery                          419               2.16                            4.97
+4   04 earlier hypertensive disorder of pregnancy                          989               5.09                           11.74
+5                 05 earlier gestational diabetes                          418               2.15                            4.96
+6                         06 chronic hypertension                          472               2.43                            5.60
+7                      07 pregestational diabetes                          267               1.37                            3.17
+8                                      08 obesity                          669               3.44                            7.94
+9                       09 chronic kidney disease                           27               0.14                            0.32
+10                             10 thyroid disease                          728               3.74                            8.64
+11    11 lupus, antiphospholipid or thrombophilia                           91               0.47                            1.08
+12                12 tobacco, alcohol or drug use                          457               2.35                            5.42
+13                             13 HIV or syphilis                           30               0.15                            0.36
+
+== Q-A5 outpatient measurements (7 days)
+                         result_name  n_admissions_with_value  pct_of_population n_last_value_within_1_year  median_days_before_admission
+1                       Weight (Lbs)                    13586               69.9                      11124                          13.0
+2                     Blood Pressure                    13267               68.2                      12161                          12.0
+3                        BMI (kg/m2)                    10195               52.4                       7950                          14.0
+4                    Height (Inches)                     9227               47.5                       5368                         267.0
+5                                BMI                      757                3.9                        730                          62.0
+6                             Weight                      124                0.6                        110                          85.0
+7             Blood Pressure Sitting                       66                0.3                         29                         518.0
+8    Blood Pressure Standing (1 min)                       52                0.3                         22                         518.0
+9               Blood Pressure Lying                       49                0.3                         19                         532.0
+10           Blood Pressure Standing                       10                0.1                         <5                        1139.0
+11  Blood Pressure Standing (3 mins)                        7                0.0                         <5                         305.0
+12                            Height                        6                0.0                          6                         207.0
+
+== Q-A6 outpatient laboratory values (7 days)
+         lab_name  n_admissions_with_value  pct_of_population  n_last_value_within_1_year  median_days_before_admission
+1  any other test                    14054               72.3                       12471                          59.0
+2      creatinine                     9790               50.4                        6460                         200.0
+3      hemoglobin                    13453               69.2                       11669                          85.0
+4  hemoglobin A1c                     3349               17.2                        2076                         239.0
+
+== Q-A7 registration variables
+   n_admissions  n_marital_status_missing  n_insurance_missing_or_other  n_language_missing  n_race_unknown_or_declined
+1         19440                       385                           441                  30                         928
+
+== S4 · Feasibility and predictors
+                                              review                                                                      result                                                                                                  decision
+1  strict events with any information (7-day margin)                                                           99 of 129 (76.7%)                                                                                     the model is feasible
+2     non-events with any information (7-day margin)                                                                       88.4%                                     each block carries an indicator: no record does not mean no condition
+3                           margins of 1 and 30 days                                             almost the same coverage (Q-A1)                                                                 7 days main; 1 and 30 days as sensitivity
+4                          earlier admissions (Q-A3)                     most were more than a year before (earlier pregnancies)                                    two indicators: any earlier admission; admission in the 90 days before
+5            conditions in earlier admissions (Q-A4)                            frequent ones alone; rare ones in two composites                                                         9 parameters of history (outcome card, section 4)
+6                     outpatient measurements (Q-A5)  about 70% with weight and blood pressure, a median of about 2 weeks before  last systolic and diastolic, any pressure of 140/90 or more, last body mass index (280 to 7 days before)
+7                outpatient laboratory values (Q-A6)            hemoglobin in about 70%; creatinine old; A1c ordered selectively                                     last hemoglobin only; one indicator of prenatal care in this hospital
+8                      registration variables (Q-A7)                                                             almost complete   age, race and ethnicity, insurance, language, marital status; admission type and location excluded (G2)
+9                               candidate parameters                                                                          27                                                     reduced set of 17 fixed before any model, for gate G3
+
+== Notebook summary
+                                                                                                                                          value
+indicator                                                                                                                                      
+return used                                                   R3: antenatal prediction point (information at least 7 days before the admission)
+population / strict events                                                                                                         19,440 / 129
+gate G1                                                                                                                                  passes
+strict events with information before the admission (7 days)                                                                  99 of 129 (76.7%)
+non-events with information before the admission (7 days)                                                                                 88.4%
+feasibility                                                                                                                            feasible
+candidate parameters                                                                                                       27 (reduced set: 17)
+next step                                                                       predictor table, unit and leakage (S5, S6, S7, G2), notebook 05

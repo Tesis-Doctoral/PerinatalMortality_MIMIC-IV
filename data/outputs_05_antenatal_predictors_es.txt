@@ -1,0 +1,142 @@
+Notebook 05 (E5, E6, E7, P2), muerte fetal MIMIC-IV, punto de predicción prenatal; solo salida agregada
+
+== E5 · Unidad de análisis y agrupación (margen de 7 días)
+   admisiones  admisiones distintas  pacientes  pacientes con más de una  eventos estrictos  pacientes compartidas entre entrenamiento y prueba
+1       19440                 19440      13735                      4722                129                                                   0
+
+== E5 · Unidad de análisis
+                                          revisión                       resultado                                  decisión
+1                                         registro  19,440 filas, una por admisión  un registro por hospitalización de parto
+2  agrupación de las 5 particiones de la puerta P3       0 pacientes a ambos lados      toda partición agrupada por paciente
+
+== Q-P1 Integridad
+   margen (días)  filas  admisiones  pacientes  eventos estrictos  con alguna información previa
+1              1  19440       19440      13735                129                          17285
+2              7  19440       19440      13735                129                          17166
+3             30  19440       19440      13735                129                          16919
+
+== E6 · Punto de predicción
+                     revisión                                resultado                                                                      decisión
+1         punto de predicción                         hora del ingreso  información registrada al menos 7 días antes (1 y 30 días como sensibilidad)
+2             embarazo actual                mediciones y laboratorios                                     solo entre 280 y 7 días antes del ingreso
+3  márgenes de 1, 7 y 30 días  se conservan la población y los eventos                                                                  se pasa a E7
+
+== Q-P2 Predictores categóricos y binarios (7 días)
+                                         predictor                  categoría  admisiones     %
+1                                  01 raza o etnia                   Asiática        1795   9.2
+2                                  01 raza o etnia                      Negra        4459  22.9
+3                                  01 raza o etnia                    Hispana        1876   9.7
+4                                  01 raza o etnia         Otra o desconocida        2595  13.3
+5                                  01 raza o etnia                     Blanca        8715  44.8
+6                                        02 seguro                   Medicaid        6169  31.7
+7                                        02 seguro  Medicare, otro o faltante         640   3.3
+8                                        02 seguro                    Privado       12631  65.0
+9                                        03 inglés                         no        1594   8.2
+10                                       03 inglés                         sí       17846  91.8
+11                                 04 estado civil                     Casada       11664  60.0
+12                                 04 estado civil                   Faltante         385   2.0
+13                                 04 estado civil                  No casada        7391  38.0
+14                     05 alguna admisión anterior                         no       11015  56.7
+15                     05 alguna admisión anterior                         sí        8425  43.3
+16              06 admisión en los 90 días previos                         no       17916  92.2
+17              06 admisión en los 90 días previos                         sí        1524   7.8
+18                             07 cesárea anterior                         no       17770  91.4
+19                             07 cesárea anterior                         sí        1670   8.6
+20  08 trastorno hipertensivo en embarazo anterior                         no       18451  94.9
+21  08 trastorno hipertensivo en embarazo anterior                         sí         989   5.1
+22                         09 hipertensión crónica                         no       18968  97.6
+23                         09 hipertensión crónica                         sí         472   2.4
+24                      10 diabetes pregestacional                         no       19173  98.6
+25                      10 diabetes pregestacional                         sí         267   1.4
+26                11 diabetes gestacional anterior                         no       19022  97.8
+27                11 diabetes gestacional anterior                         sí         418   2.2
+28                     12 tabaco, alcohol o drogas                         no       18983  97.6
+29                     12 tabaco, alcohol o drogas                         sí         457   2.4
+30                          13 enfermedad tiroidea                         no       18712  96.3
+31                          13 enfermedad tiroidea                         sí         728   3.7
+32       14 resultado adverso en embarazo anterior                         no       18981  97.6
+33       14 resultado adverso en embarazo anterior                         sí         459   2.4
+34        15 otra condición crónica de alto riesgo                         no       19297  99.3
+35        15 otra condición crónica de alto riesgo                         sí         143   0.7
+36               16 alguna presión de 140/90 o más                         no       17431  89.7
+37               16 alguna presión de 140/90 o más                         sí        2009  10.3
+38            17 control prenatal en este hospital                         no        4486  23.1
+39            17 control prenatal en este hospital                         sí       14954  76.9
+40        18 antecedente hipertensivo (cualquiera)                         no       18092  93.1
+41        18 antecedente hipertensivo (cualquiera)                         sí        1348   6.9
+42                        19 diabetes (cualquiera)                         no       18771  96.6
+43                        19 diabetes (cualquiera)                         sí         669   3.4
+
+== Q-P3 Predictores continuos (7 días)
+              predictor  con valor  % con valor   p05    p25  mediana    p75    p95
+1                1 edad      19440        100.0  22.0   29.0     33.0   36.0   41.0
+2    2 última sistólica      11916         61.3  98.0  108.0    116.0  122.0  136.0
+3   3 última diastólica      11916         61.3  58.0   64.0     70.0   78.0   86.0
+4          4 último IMC       8304         42.7  22.7   27.0     30.5   35.1   44.2
+5  5 última hemoglobina      11435         58.8   9.6   10.8     11.5   12.2   13.3
+
+== Q-P4 Origen del índice de masa corporal (7 días)
+   registrado  calculado con peso y talla  faltantes
+1        8282                          22      11136
+
+== E7 · Parámetros candidatos por bloque
+                                     bloque                                                                                                                                                                                     parámetros de la matriz de diseño parámetros
+1                                  registro                                                            age, race_Black, race_Hispanic, race_Asian, race_Other or unknown, ins_Medicaid, ins_Medicare_other_missing, english, marital_Not_married, marital_Missing         10
+2                    historia de atenciones                                                                                                                                                                              any_prior_admission, prior_admission_90d         <5
+3     antecedentes en admisiones anteriores  hx_cesarean, hx_hypertensive_pregnancy, hx_chronic_hypertension, hx_pregestational_diabetes, hx_gestational_diabetes, hx_substance_use, hx_thyroid_disease, hx_adverse_pregnancy_outcome, hx_other_high_risk_chronic          9
+4  embarazo actual, mediciones ambulatorias                                                                                                                                                                         last_sbp, last_dbp, any_elevated_bp, last_bmi         <5
+5              embarazo actual, laboratorio                                                                                                                                                                                                    última hemoglobina         <5
+6                                 indicador                                                                                                                                                                                                had_prenatal_care_here         <5
+
+== E7 · Faltantes de la matriz de diseño (toda la población)
+                    faltantes  % faltante
+parámetro                                
+última sistólica         7524        38.7
+última diastólica        7524        38.7
+último IMC              11136        57.3
+última hemoglobina       8005        41.2
+
+== E7 · Conjunto reducido fijado antes de cualquier modelo (solo si la puerta P3 no pasara con los 27 parámetros)
+                                                       predictor
+1                                                           edad
+2                                    raza y etnia (4 parámetros)
+3                                                       Medicaid
+4                                                         Inglés
+5                                                         casada
+6                         tuvo control prenatal en este hospital
+7                                       última presión sistólica
+8                                 presión elevada (140/90 o más)
+9                                        índice de masa corporal
+10                                                   hemoglobina
+11     antecedente hipertensivo (crónico o en embarazo anterior)
+12  diabetes (pregestacional o gestacional en embarazo anterior)
+13                        resultado adverso en embarazo anterior
+
+== E7 · Predictores
+                          revisión                                   resultado                                                       decisión
+1            parámetros candidatos                                          27                                 como en la ficha del desenlace
+2  eventos por parámetro candidato                                         4.8  menos de 20: modelo principal, regresión logística penalizada
+3                        faltantes  solo en las mediciones del embarazo actual  imputación múltiple dentro de cada partición de entrenamiento
+4                conjunto reducido                               17 parámetros            fijado antes de cualquier modelo, para la puerta P3
+
+== P2 · Verificaciones de fuga
+                                                                                                                      verificación                                                                  resultado
+1  columnas del ingreso actual en la tabla de predictores o la matriz de diseño (tipo o lugar de admisión, egreso, urgencias, DRG)                                                                    ninguno
+2                                                                   diagnósticos, procedimientos o laboratorios del ingreso actual  ninguno: la tabla solo lee admisiones anteriores y registros ambulatorios
+3                                                                                                   mediciones del embarazo actual                                       entre 280 y 7 días antes del ingreso
+4                                                                                     pacientes a ambos lados de las 5 particiones                                                                          0
+
+== P2 · Puerta de fuga
+                                                  revisión resultado                                    decisión
+1  información del ingreso actual o posterior a la ventana   ninguno  pasa: se pasa a la puerta P3 (notebook 06)
+
+== Resumen del notebook
+                                                                                                    valor
+indicador                                                                                                
+admisiones / pacientes (margen de 7 días)                                                 19,440 / 13,735
+eventos estrictos                                                                                     129
+parámetros candidatos                                                                                  27
+eventos por parámetro                                                                                 4.8
+faltantes: presión / hemoglobina / índice de masa corporal                          38.7% / 41.2% / 57.3%
+puerta P2                                                                                            pasa
+paso siguiente                                              puerta de tamaño de muestra (P3), notebook 06

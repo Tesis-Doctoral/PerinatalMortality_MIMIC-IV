@@ -1,0 +1,55 @@
+Gate G3 (sample size), antenatal model; aggregate output only
+buffer_days=7; folds=5 grouped by patient; seed=20261119
+admissions=19440; events=129; prevalence=0.0066; candidate_parameters=27
+R2_cs_max=0.0767; R2_cs_observed_cv=-0.00221 (-2.9% of max)
+gate=NOT PASSED (cross-validated R2 is not positive)
+
+== G3 · Data of the gate (7-day margin)
+   n_admissions  n_patients  n_strict_events
+1         19440       13735              129
+
+== G3 · Candidate parameters and missing values
+   candidate parameters  missing last_sbp  missing last_dbp  missing last_bmi  missing last_hemoglobin
+1                    27              7524              7524             11136                     8005
+
+== G3 · Test part of each split
+   fold  n_admissions  n_events
+1     1          3889        26
+2     2          3887        25
+3     3          3888        26
+4     4          3888        26
+5     5          3888        26
+
+== G3 · Observed Cox-Snell R2 and minimum R2 for the candidate parameters
+                                    indicator                                            value
+1                                  prevalence                                           0.0066
+2                        maximum Cox-Snell R2                                           0.0767
+3     observed Cox-Snell R2 (cross-validated)                                         -0.00221
+4               observed R2, % of the maximum                                             -2.9
+5                minimum R2 for 27 parameters                                           0.0124
+6  minimum R2 for 17 parameters (reduced set)                                           0.0078
+7                                     gate G3  NOT PASSED (cross-validated R2 is not positive)
+
+== G3 · Sample size gate
+                                     review                                          result                                                                                        decision
+1  observed Cox-Snell R2 with 27 parameters                 -0.00221 (-2.9% of the maximum)                                                                                   does not pass
+2              reduced set of 17 parameters             it would need R2 of at least 0.0078  not applied: allowed only for a model that meets G4, and with this R2 it would not pass either
+3                                   returns  R3 already used (admission + 6 h -> antenatal)                                               no more frequent rung for fetal death in MIMIC-IV
+
+== Class of the model and reporting (S11)
+                         review                                                       result                                                                                     decision
+1         M3 at admission + 6 h  stopped at S6: more than half of the deaths already present                                                                      return R3 (notebook 03)
+2             M3 · R3 antenatal                      stopped at G3: observed R2 not positive                                                                                  FEASIBILITY
+3  stages S8 to S10 and gate G4                                              not carried out                                                                                            —
+4               reporting (S11)           count audit, reason of the return and result of G3  with the information MIMIC-IV records before the admission, fetal death cannot be predicted
+
+== Notebook summary
+                                                                                                                           value
+indicator                                                                                                                       
+admissions / strict events                                                                                          19,440 / 129
+candidate parameters                                                                                                          27
+observed Cox-Snell R2 (cross-validated)                                                   -0.00221 (-2.9% of the maximum 0.0767)
+minimum R2 for 27 / 17 parameters                                                                                0.0124 / 0.0078
+gate G3                                                                          NOT PASSED (cross-validated R2 is not positive)
+class of M3                                                                                                          FEASIBILITY
+path of M3                               S1-S6 at admission + 6 h -> return R3 -> S2-S7 and G1, G2 antenatal -> G3 does not pass

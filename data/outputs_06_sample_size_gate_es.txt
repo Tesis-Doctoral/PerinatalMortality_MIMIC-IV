@@ -1,0 +1,55 @@
+Gate P3 (sample size), antenatal model; aggregate output only
+buffer_days=7; folds=5 grouped by patient; seed=20261119
+admissions=19440; events=129; prevalence=0.0066; candidate_parameters=27
+R2_cs_max=0.0767; R2_cs_observed_cv=-0.00221 (-2.9% of max)
+gate=NOT PASSED (cross-validated R2 is not positive)
+
+== P3 · Datos de la puerta (margen de 7 días)
+   admisiones  pacientes  eventos estrictos
+1       19440      13735                129
+
+== P3 · Parámetros candidatos y faltantes
+   parámetros candidatos  faltantes última sistólica  faltantes última diastólica  faltantes último IMC  faltantes última hemoglobina
+1                     27                        7524                         7524                 11136                          8005
+
+== P3 · Parte de prueba de cada partición
+   partición  admisiones  eventos
+1          1        3889       26
+2          2        3887       25
+3          3        3888       26
+4          4        3888       26
+5          5        3888       26
+
+== P3 · R2 de Cox-Snell observado y R2 mínimo para los parámetros candidatos
+                                          indicador                                                  valor
+1                                       prevalencia                                                 0.0066
+2                            R2 de Cox-Snell máximo                                                 0.0767
+3    R2 de Cox-Snell observado (validación cruzada)                                               -0.00221
+4                        R2 observado, % del máximo                                                   -2.9
+5                      R2 mínimo para 27 parámetros                                                 0.0124
+6  R2 mínimo para 17 parámetros (conjunto reducido)                                                 0.0078
+7                                         puerta P3  NO PASA (el R2 con validación cruzada no es positivo)
+
+== P3 · Puerta de tamaño de muestra
+                                      revisión                                resultado                                                                                   decisión
+1  R2 de Cox-Snell observado con 27 parámetros              -0.00221 (-2.9% del máximo)                                                                                    no pasa
+2           conjunto reducido de 17 parámetros     necesitaría un R2 de al menos 0.0078  no se aplica: solo se permite para un modelo que cumple P4, y con este R2 tampoco pasaría
+3                                     retornos  R3 ya usado (ingreso + 6 h -> prenatal)                           no hay un peldaño más frecuente para la muerte fetal en MIMIC-IV
+
+== Clase del modelo y reporte (E11)
+                      revisión                                                     resultado                                                                                         decisión
+1          M3 al ingreso + 6 h  se detuvo en E6: más de la mitad de las muertes ya presentes                                                                         retorno R3 (notebook 03)
+2             M3 · R3 prenatal                     se detuvo en P3: R2 observado no positivo                                                                                     FACTIBILIDAD
+3  etapas E8 a E10 y puerta P4                                                no se realizan                                                                                                —
+4                reporte (E11)     auditoría de conteos, razón del retorno y resultado de P3  con la información que MIMIC-IV registra antes del ingreso, la muerte fetal no puede predecirse
+
+== Resumen del notebook
+                                                                                                                        valor
+indicador                                                                                                                    
+admisiones / eventos estrictos                                                                                   19,440 / 129
+parámetros candidatos                                                                                                      27
+R2 de Cox-Snell observado (validación cruzada)                                             -0.00221 (-2.9% del máximo 0.0767)
+R2 mínimo para 27 / 17 parámetros                                                                             0.0124 / 0.0078
+puerta P3                                                               NO PASA (el R2 con validación cruzada no es positivo)
+clase del M3                                                                                                     FACTIBILIDAD
+ruta del M3                                     E1-E6 al ingreso + 6 h -> retorno R3 -> E2-E7 y P1, P2 prenatal -> P3 no pasa

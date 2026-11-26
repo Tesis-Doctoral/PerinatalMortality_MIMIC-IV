@@ -1,0 +1,180 @@
+Notebook 01 (S1, S2, S3, G1), fetal death MIMIC-IV (M3); aggregate output only
+
+== S1 · Configuration of this repository
+                        item                                                                                                                                      value status
+1                data source                                      MIMIC-IV v3.1 (PhysioNet), Beth Israel Deaconess Medical Center, 2008-2022; dates shifted per patient  fixed
+2                   database                                                    local PostgreSQL copy of MIMIC-IV (schema mimiciv); credentials in .env (not versioned)     ok
+3   revised obstetric cohort                                                                  cohort_obstetric_v2, hadm_delivery_v2, obstetric_dx_v2, predictors_24h_v2     ok
+4                   data use  PhysioNet Credentialed Health Data Use Agreement and CITI training: research only; no re-identification; data not shared or redistributed   rule
+5           publication rule                      only aggregate outputs (data/outputs_*.txt); counts from 1 to 4 shown as <5 (D13); no subject_id or hadm_id published   rule
+6                random seed                                                                                                             20261119 (notebooks 05 and 06)  fixed
+7           reference counts                                                frozen at the count audit (count_audit.md) and reproduced by gate G1 in notebooks 01 and 04  fixed
+8                     python                                                                                                                                     3.11.9   info
+9                     pandas                                                                                                                                      3.1.1     ok
+10                     numpy                                                                                                                                      2.4.6     ok
+11                   sklearn                                                                                                                                      1.9.1     ok
+12                     scipy                                                                                                                                     1.17.1     ok
+13                sqlalchemy                                                                                                                                      2.1.9     ok
+14                  psycopg2                                                                                                               2.9.13 (dt dec pq3 ext lo64)     ok
+
+== S2 · Obstetric universe and population of the model
+   n_admissions  n_patients  n_delivery_hospitalizations  n_stillbirth_code_without_delivery_flag  n_population  n_patients_population
+1         25736       15084                        19425                                       15         19440                  13735
+
+== S2 · Decision D3: population
+                                       review                                result                                                                                                 decision
+1                     population of the model  19,440 admissions of 13,735 patients                                                 delivery hospitalizations (v2 flag) or a stillbirth code
+2  stillbirth codes without the delivery flag                         15 admissions  they stay in the population: the delivery flag leaves them out because they also carry an abortive code
+3                         record and grouping                 one row per admission                            one record per delivery hospitalization, grouped by patient (S5, notebook 03)
+
+== Q-T15a patterns by tier
+       tier  icd_version n_patterns
+1  excluded            9         <5
+2  excluded           10         <5
+3   partial            9         <5
+4   partial           10         <5
+5    strict            9         <5
+6    strict           10         <5
+
+== Q-T15b admissions per pattern
+        tier  icd_version code_pattern n_admissions_database n_in_obstetric_universe n_in_population_d3
+1   excluded            9          632                    69                      69                 <5
+2   excluded           10         O021                    44                      44                  6
+3    partial            9         V273                     7                       7                  7
+4    partial           10         O312                    12                      12                  8
+5    partial           10         Z373                     5                       5                 <5
+6     strict            9         6564                    44                      44                 38
+7     strict            9         V271                    47                      47                 47
+8     strict            9         V274                     5                       5                  5
+9     strict            9         V277                    <5                      <5                 <5
+10    strict           10         O364                    45                      45                 44
+11    strict           10         Z371                    66                      66                 66
+12    strict           10         Z374                    <5                      <5                 <5
+
+== Q-T15c full codes in the universe
+       tier  icd_version icd_code n_admissions
+1   partial            9     V273            7
+2   partial           10  O3121X1           <5
+3   partial           10  O3122X1           <5
+4   partial           10  O3122X2           <5
+5   partial           10  O3123X0           <5
+6   partial           10  O3123X1            5
+7   partial           10  O3123X2           <5
+8   partial           10     Z373            5
+9    strict            9    65641           38
+10   strict            9    65643            6
+11   strict            9     V271           47
+12   strict            9     V274            5
+13   strict            9     V277           <5
+14   strict           10  O364XX0           44
+15   strict           10  O364XX2           <5
+16   strict           10     Z371           66
+17   strict           10     Z374           <5
+
+== Q-T15e excluded families in the universe
+                     family  n_admissions  n_also_with_event_code  n_without_event_code
+1  early loss (O02.1 / 632)           113                      11                   102
+
+== Q-T16b strict events outside population D3
+       icd_era  has_intrauterine_death_code  has_stillbirth_outcome_code  has_antepartum_6564_code        next_delivery_admission n_events
+1  ICD-10 only                         True                        False                     False  4 no later delivery admission       <5
+2   ICD-9 only                         True                        False                      True                 2 8 to 90 days       <5
+3   ICD-9 only                         True                        False                      True            3 more than 90 days       <5
+4   ICD-9 only                         True                        False                      True  4 no later delivery admission       <5
+
+== Q-T16c strict events by code family
+       icd_era  in_pop_d3                     code_family n_events  n_with_antepartum_6564
+1  ICD-10 only      False  1 intrauterine death code only       <5                       0
+2  ICD-10 only       True  1 intrauterine death code only       <5                       0
+3  ICD-10 only       True  2 stillbirth outcome code only       27                       0
+4  ICD-10 only       True                 3 both families       43                       0
+5   ICD-9 only      False  1 intrauterine death code only        6                       6
+6   ICD-9 only       True  1 intrauterine death code only       <5                       0
+7   ICD-9 only       True  2 stillbirth outcome code only       20                       0
+8   ICD-9 only       True                 3 both families       34                       0
+
+== Q-T16d position of the strict code
+                       code_family           position_band n_events
+1   1 intrauterine death code only            1 position 1       <5
+2   1 intrauterine death code only      2 positions 2 to 3       <5
+3   1 intrauterine death code only     3 positions 4 to 10       <5
+4   1 intrauterine death code only  4 position 11 or later       <5
+5   2 stillbirth outcome code only      2 positions 2 to 3       23
+6   2 stillbirth outcome code only     3 positions 4 to 10       21
+7   2 stillbirth outcome code only  4 position 11 or later       <5
+8                  3 both families            1 position 1       64
+9                  3 both families      2 positions 2 to 3       11
+10                 3 both families     3 positions 4 to 10       <5
+11                 3 both families  4 position 11 or later       <5
+
+== Q-T16e events with early-loss code
+         fd_tier  has_early_loss_code  has_abortive_code   gest_band n_admissions
+1   partial only                False              False  28 or more            8
+2   partial only                False              False    under 22           <5
+3   partial only                False              False     unknown           <5
+4         strict                False              False    22 to 27           17
+5         strict                False              False  28 or more           36
+6         strict                False              False    under 22            7
+7         strict                False              False     unknown           54
+8         strict                False               True    22 to 27           <5
+9         strict                False               True  28 or more           <5
+10        strict                False               True    under 22           <5
+11        strict                False               True     unknown           <5
+12        strict                 True               True    under 22            5
+13        strict                 True               True     unknown            5
+
+== Q-T16f label sizes
+                                     scope  n_admissions  n_main_strict  n_strict_plus_partial  n_strict_without_early_loss_code  n_ge22_weeks n_strict_weeks_unknown  n_ge28_weeks
+1                          1 population D3         19440            129                    142                               119            55                     61            37
+2  2 population D3, ICD-10 admissions only          8893             71                     80                                65            55                     <5            37
+3          3 population D3, with Z3A weeks          8852             68                     77                                63            55                      0            37
+
+== Q-T16g D8 admissions shorter than 6 h
+        fd_tier  n_admissions n_end_before_6h  n_los_missing
+1      no event         19298              <5              0
+2  partial only            13               0              0
+3        strict           129               0              0
+
+== S3 · Decision D5: outcome definition
+                                    review                                result                                        decision
+1                               main label                     129 strict events  strict fetal-death code at any gestational age
+2                strict plus partial codes                            142 events                            sensitivity analysis
+3        strict without an early-loss code                            119 events                            sensitivity analysis
+4           22 weeks or more (ICD-10 only)                             55 events                            sensitivity analysis
+5           28 weeks or more (ICD-10 only)                             37 events                            sensitivity analysis
+6  strict events without gestational weeks                             61 events                                  reported apart
+7                        time of the event  none: discharge codes without a date       measured with proxies in S6 (notebook 03)
+
+== G1 · Reference counts of the count audit
+                                                 count  loaded  expected      result
+1                       universe: obstetric admissions   25736     25736  reproduced
+2                                   universe: patients   15084     15084  reproduced
+3                            delivery hospitalizations   19425     19425  reproduced
+4                label table: rows (one per admission)   25736     25736  reproduced
+5                     label table: distinct admissions   25736     25736  reproduced
+6                 events, strict or partial (universe)     154       154  reproduced
+7                             strict events (universe)     136       136  reproduced
+8                       partial-only events (universe)      18        18  reproduced
+9                                        population D3   19440     19440  reproduced
+10  population D3 (S2) = population of the label table   19440     19440  reproduced
+11                             events in population D3     142       142  reproduced
+12         strict events in population D3 (main label)     129       129  reproduced
+13                 strict events outside population D3       7         7  reproduced
+14                      events with an early-loss code      11        11  reproduced
+15        verified catalogue: strict events (universe)     136       136  reproduced
+16  verified catalogue: strict events in population D3     129       129  reproduced
+
+== G1 · Definition gate
+                                                    review  result                                                      decision
+1  population, unit and outcome fixed; counts reproducible  passes  the definition is fixed: on to the count audit (notebook 02)
+
+== Notebook summary
+                                                                                  value
+indicator                                                                              
+population of the model (D3)                       19,440 admissions of 13,735 patients
+main label (D5)                          strict fetal-death code at any gestational age
+strict events in the population                                             129 (0.66%)
+events with partial codes (sensitivity)                                             142
+event time in the data                             none: discharge codes without a date
+gate G1                                                                          passes
+next step                                                 count audit (S4), notebook 02

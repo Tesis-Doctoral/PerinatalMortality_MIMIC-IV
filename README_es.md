@@ -1,102 +1,81 @@
-# Modelos de muerte perinatal (componente fetal) en MIMIC-IV
+# Muerte fetal en MIMIC-IV (modelo M3)
 
 > **Framework.** Este repositorio aplica el framework por etapas para modelos de predicción clínica de la tesis. El framework (etapas, puertas, criterios y literatura) y el catálogo de modelos con su estado están en [StagedFramework_ClinicalPrediction](https://github.com/Tesis-Doctoral/StagedFramework_ClinicalPrediction).
 
-Modelos de predicción de la **muerte perinatal** en admisiones obstétricas de MIMIC-IV, empezando por el **componente de muerte fetal** identificado a partir de los códigos ICD de la madre (el "Modelo C" de la tesis). Este proyecto continúa el trabajo exploratorio hecho dentro de `MaternalMortality_MIMIC-IV`, que se conserva en [`legacy/`](legacy/) hasta que se migre.
+¿Se puede predecir la muerte fetal en las hospitalizaciones de parto de MIMIC-IV? El desenlace es la parte de la mortalidad perinatal que ocurre antes del nacimiento, identificada con los códigos CIE de la madre (MIMIC-IV no vincula a la madre con el recién nacido, así que no captura las muertes neonatales tempranas). Los notebooks siguen el framework etapa por etapa y puerta por puerta, en dos puntos de predicción:
 
-> **Estado: migración terminada; los scripts SQL nuevos se están ejecutando uno por uno.** Ejecutados hasta ahora: la tabla verificada de códigos (T15), la auditoría de conteos (T08, T20) y la etiqueta por admisión (T16). Escrito y pendiente de ejecutar: la unidad de análisis (T17). Los cuatro scripts migrados en `sql/`, las consultas de los conjuntos de datos en `libraries/database.py` y el notebook de modelado no se han ejecutado en su nueva ubicación.
+1. **Ingreso + 6 horas.** La auditoría de conteos encontró que 73 de las 129 muertes fetales (56,6%) ya estaban presentes en ese punto, así que la etapa E6 detuvo el modelo antes de ajustarlo: habría fallado el criterio C1.
+2. **Retorno R3: predicción prenatal.** Solo con la información registrada al menos 7 días antes del ingreso. El modelo es factible en los datos (99 de 129 eventos tienen información previa), pero la puerta de tamaño de muestra P3 no pasa: el R² de Cox-Snell con validación cruzada es negativo (−0,00054).
+
+> **Estado: clasificado como análisis de factibilidad.** Con la información que MIMIC-IV registra antes del ingreso, la muerte fetal no puede predecirse. No se realizan las etapas E8 a E10 ni la puerta P4.
 
 [English version](README.md)
 
-## Alcance
+## Orden de ejecución
 
-- **Desenlace:** muerte fetal desde las 22 semanas completas de gestación (período perinatal de la OMS / ICD-10), identificada a partir de los códigos ICD-9-CM e ICD-10-CM de la madre (una definición *estricta* y una *parcial* que añade los embarazos múltiples en los que murieron solo algunos fetos).
-- **Limitación de los datos:** MIMIC-IV no tiene un vínculo madre–recién nacido validado, por lo que las muertes neonatales tempranas (que están en el registro del recién nacido) **no** se capturan.
-- **Población:** admisiones obstétricas de la cohorte materna de `MaternalMortality_MIMIC-IV`.
-- **Regla contra la fuga de información:** un predictor debe conocerse al llegar o antes, o medirse en las primeras 24 horas; no se usan diagnósticos, procedimientos, DRG ni tratamientos de la misma admisión, porque los genera el propio evento.
+Cada notebook tiene su versión en inglés (sin sufijo) y en español (`_es`), con el mismo código; solo cambia el idioma de las salidas. Cada sección empieza con el código de la etapa o la puerta, una breve descripción y una tabla de resultado → acción, y su salida termina con la decisión tomada. Cada notebook termina con un resumen.
 
-El plan de análisis (versión 2, 28/10/2026) está en [`analysis_plan_es.md`](analysis_plan_es.md) (inglés: [`analysis_plan.md`](analysis_plan.md)). Sigue el proyecto materno: una auditoría de conteos y las decisiones sobre cohorte, unidad de análisis y punto de predicción van antes de cualquier modelo. El avance se sigue tarea por tarea en el Excel local `docs/Plan_Muerte_Fetal_MIMIC-IV.xlsx` (no versionado).
+| Orden | Notebook | Etapas y puertas | Tablas del esquema `mimiciv` que construye o verifica | Salida |
+|---|---|---|---|---|
+| 1 | `notebooks/01_outcome_definition_es.ipynb` | E1 · E2 · E3 · P1 | `fetal_death_code_patterns_v2`, `fetal_death_label_v2` | `data/outputs_01_outcome_definition.txt` |
+| 2 | `notebooks/02_count_audit_es.ipynb` | E4 | ninguna (solo lectura) | `data/outputs_02_count_audit.txt` |
+| 3 | `notebooks/03_unit_and_prediction_point_es.ipynb` | E5 · E6 → retorno R3 | `unit_of_analysis_v2` | `data/outputs_03_unit_and_prediction_point.txt` |
+| 4 | `notebooks/04_antenatal_count_audit_es.ipynb` | R3 · E2 · E3 · P1 · E4 | `antenatal_obstetric_universe`, `antenatal_fetal_death_label` | `data/outputs_04_antenatal_count_audit.txt` |
+| 5 | `notebooks/05_antenatal_predictors_es.ipynb` | E5 · E6 · E7 · P2 | `antenatal_predictors_v1` | `data/outputs_05_antenatal_predictors.txt` |
+| 6 | `notebooks/06_sample_size_gate_es.ipynb` | P3 · clase · E11 | ninguna | `data/outputs_06_sample_size_gate.txt` |
 
-La auditoría de conteos está redactada en [`count_audit_es.md`](count_audit_es.md) (inglés: [`count_audit.md`](count_audit.md)): qué midió cada conteo, qué resolvió y qué sigue abierto.
+Los notebooks corren los scripts de `sql/` en una sola conexión, como DBeaver con Alt+X. Las tablas del esquema `mimiciv` que ya existen se leen como están y solo se corren sus verificaciones; si una tabla no existe, se construye con su script. Para reconstruirla, poner **`REBUILD = True`** en la primera celda de código del notebook. Las salidas `data/outputs_*.txt` están en inglés (las citan los documentos); los notebooks en español escriben además una copia `data/outputs_*_es.txt`.
 
-El framework por etapas (versión 1.0, alineada con el artículo de SMM: etapas E1–E11, puertas P1–P4, retornos R1–R4) está en [`framework_es.md`](framework_es.md) (inglés: [`framework.md`](framework.md)); la ficha del desenlace de este proyecto es [`docs/outcome_card_fetal_death_es.md`](docs/outcome_card_fetal_death_es.md). La maqueta del 29/10/2026 se guarda en `docs/backup_framework_v0.1/`. Los análisis de sensibilidad del plan se numeran SA1–SA11.
+Conteos de referencia que deben reproducirse (puerta P1): 25.736 admisiones obstétricas de 15.084 pacientes; 19.440 admisiones en la población del modelo, de 13.735 pacientes; 129 eventos estrictos y 142 con códigos parciales.
+
+## Documentos
+
+| Documento | Contenido |
+|---|---|
+| [`count_audit_es.md`](count_audit_es.md) | Auditoría de conteos del punto de predicción al ingreso (grupos A a E) y decisiones D1 a D8 |
+| [`count_audit_antenatal_es.md`](count_audit_antenatal_es.md) | Auditoría de la información disponible antes del ingreso (retorno R3) |
+| [`predictor_table_antenatal_es.md`](predictor_table_antenatal_es.md) | Verificación de la tabla de predictores prenatales |
+| [`docs/outcome_card_fetal_death_es.md`](docs/outcome_card_fetal_death_es.md) | Ficha del desenlace, punto de predicción al ingreso + 6 h |
+| [`docs/outcome_card_antenatal_es.md`](docs/outcome_card_antenatal_es.md) | Ficha del desenlace, retorno R3 (predicción prenatal) |
+| [`analysis_plan_es.md`](analysis_plan_es.md) | Plan de análisis (decisiones D1 a D14) |
+| [`framework_es.md`](framework_es.md) | Framework por etapas aplicado |
+
+Cada documento tiene su versión en inglés con el mismo nombre sin `_es`.
+
+## Requisitos previos
+
+- Una base local de PostgreSQL con MIMIC-IV v3.1 (esquema `mimiciv`).
+- Las tablas de la cohorte obstétrica revisada: `cohort_obstetric_v2`, `hadm_delivery_v2`, `obstetric_dx_v2` y `predictors_24h_v2` (notebooks 01 a 03). El retorno R3 (notebooks 04 a 06) construye su propio universo desde las tablas de MIMIC-IV y no depende de ellas.
+- Copiar `.env.example` a `.env` en la raíz del proyecto y completar la contraseña de la base local. `.env` nunca se versiona.
+- Entorno de Python:
+  ```powershell
+  python -m venv .venv
+  .venv\Scripts\activate          # macOS/Linux: source .venv/bin/activate
+  pip install -r requirements.txt
+  ```
+  Seleccionar `.venv` como intérprete y como kernel de Jupyter.
 
 ## Estructura del repositorio
 
 ```
-sql/                        Scripts SQL de este proyecto, cada uno con su versión _es (ver "Scripts SQL" más abajo)
-notebooks/                  01_fetal_death_models.ipynb (hold-out, validación cruzada agrupada por paciente, ablación por bloques de variables, análisis de sensibilidad, SHAP)
-libraries/
-  database.py               Conexión a la base PostgreSQL de MIMIC-IV (variables de entorno) y las dos consultas que cargan los conjuntos de datos de muerte fetal
-  functions.py              Pequeña utilidad estadística
-scripts/
-  check_sql_pair.py         Verifica que cada script SQL y su versión _es tengan el mismo código
-data/                       Tablas de grupos de categorías *_groups.xlsx (solo equivalencias) y salidas agregadas outputs_*.txt (solo conteos y métricas); nada más se versiona
-docs/                       Documentos de reporte (lista TRIPOD+AI, tablas suplementarias), el Excel de seguimiento (local) y backup_plan_v1/
-legacy/                     Copias originales del material anterior, conservadas solo como referencia (ver legacy/README.md)
-docker-compose.yml          Entorno local opcional de PostgreSQL + Jupyter
-requirements.txt  .env.example  LICENSE
-.vscode/                    Ajustes compartidos de VS Code y extensiones recomendadas
-PerinatalMortality_MIMIC-IV.code-workspace
+notebooks/                 Los seis notebooks, en el orden del framework (EN y _es)
+sql/00_mimic_layer/        Unidad de análisis (E5): unit_of_analysis_v2
+sql/01_labels/             Catálogo verificado de códigos y etiqueta por admisión (E3)
+sql/02_audit_counts/       Auditoría de conteos al ingreso: grupos A-D, E (punto de predicción) y G (momento del evento); solo lectura
+sql/03_antenatal/          Retorno R3: universo, etiqueta, información previa al ingreso y tabla de predictores
+libraries/                 database.py (conexión), sql_runner.py (corre los scripts), presentation.py e i18n (tablas EN/ES),
+                           antenatal_design.py (matriz de diseño de los 27 parámetros)
+scripts/check_sql_pair.py  Verifica que cada script SQL y su versión _es tengan el mismo código
+data/                      Solo salidas agregadas outputs_*.txt y las tablas de grupos *_groups.xlsx
+docs/                      Fichas del desenlace y figura del framework
+legacy/                    Material anterior al framework, solo como referencia
 ```
 
-## Scripts SQL
-
-**Catálogo verificado de códigos (tarea T15 del plan, ejecutado el 28/10/2026).** `sql/01_labels/01_fetal_death_codes_official.sql` (versión en español: `01_fetal_death_codes_official_es.sql`) crea `mimiciv.fetal_death_code_patterns_v2`: cada patrón de código de muerte fetal con su título oficial, su nivel (estricto, parcial o excluido) y su fuente, más cinco verificaciones agregadas (Q-T15a a Q-T15e). Reemplaza los 13 patrones provisionales de los scripts antiguos; los códigos no cambian, pero la muerte fetal temprana (O02.1, 632) y los códigos de registros de recién nacidos (P95, 768.0, 768.1) quedan ahora listados como excluidos de forma explícita. Se ejecuta como un solo script completo en una conexión (DBeaver: Alt+X).
-
-**Etiqueta por admisión (tarea T16 del plan, ejecutada el 29/10/2026).** `sql/01_labels/02_fetal_death_label_by_admission.sql` (versión en español: `02_fetal_death_label_by_admission_es.sql`) crea `mimiciv.fetal_death_label_v2`, una fila por admisión de `cohort_obstetric_v2`, construida con la tabla verificada de códigos. Además de la etiqueta principal (código estricto, decisión D5) incluye, como columnas y no como filtros, el nivel del evento, las familias de código, la posición del código, las banderas de pérdida temprana y de registro del recién nacido, las semanas de gestación de los códigos Z3A, la era de CIE, la bandera de población de D3 y la bandera de D8 (`ends_before_6h`). Siguen siete verificaciones agregadas (Q-T16a a Q-T16g). Ejecutar el script completo en una sola conexión (DBeaver: Alt+X); la tabla es persistente, así que las verificaciones se pueden repetir solas.
-
-**Unidad de análisis (tarea T17 del plan, escrita el 29/10/2026, aún sin ejecutar).** `sql/00_mimic_layer/01_unit_of_analysis.sql` (versión en español: `01_unit_of_analysis_es.sql`) crea `mimiciv.unit_of_analysis_v2`, una fila por admisión de `cohort_obstetric_v2` y ninguna columna del desenlace: es el adaptador de MIMIC-IV de la etapa E5 del framework (ver `framework_es.md`). Trae las columnas del contrato (`unit_id`, `group_id`, `t0`, `t_pred` = ingreso + 6 h, `t_end`), el periodo (era CIE, grupo de año ancla), el orden de las admisiones, el intervalo con la anterior y las cadenas de embarazo para intervalos de 30, 90 y 180 días. Siete verificaciones agregadas (Q-T17a a Q-T17g) reproducen las cifras de la auditoría de conteos y la consistencia con la tabla de etiqueta; necesitan `fetal_death_label_v2` (T16). Ejecútelo como un script completo en una sola conexión (DBeaver: Alt+X).
-
-**Auditoría de conteos, grupo G (tarea T45, escrita el 17/11/2026, aún sin ejecutar).** `sql/02_audit_counts/audit_counts_event_timing.sql` (versión en español: `audit_counts_event_timing_es.sql`) cuenta los proxies que podrían ubicar cada evento de muerte fetal en el tiempo (código de muerte intrauterina, código de muerte fetal como diagnóstico principal, valores de laboratorio del estudio y mifepristona o misoprostol con su hora, procedimiento de parto el día del ingreso) y propone clases temporales. Prepara los criterios C1 y C2 de la puerta de clasificación (etapa E3 del framework, puerta P1). Solo lectura; necesita `fetal_death_label_v2` (T16). Ejecútelo como un script completo en una sola conexión (DBeaver: Alt+X); Q-G3 y Q-G4 pueden tardar unos minutos.
-
-**Auditoría de conteos (tarea T08 del plan, ejecutada el 28/10/2026).** `sql/02_audit_counts/audit_counts.sql` (versión en español: `audit_counts_es.sql`) trabaja sobre las tablas revisadas del proyecto materno (`cohort_obstetric_v2`, `hadm_delivery_v2`, `obstetric_dx_v2`, `predictors_24h_v2`). Es de solo lectura (tablas temporales y SELECT, salida agregada) y cubre los grupos A–D del plan: conteos base, eventos y definición, solapamiento de pacientes y mismo embarazo, época y codificación. Se ejecuta como un solo script completo en una conexión (DBeaver: Alt+X); cada resultado empieza con una columna `q` que coincide con el identificador de la hoja *Conteos* del Excel de seguimiento. La etiqueta es provisional (los 13 patrones de código heredados) hasta la tabla verificada de códigos de la tarea T15; Q-C5 se calcula en el notebook de la tarea T13.
-
-**Auditoría de conteos, grupo E (tarea T20, ejecutada el 28/10/2026).** `sql/02_audit_counts/audit_counts_timing.sql` (versión en español: `audit_counts_timing_es.sql`) trabaja sobre la población decidida en D3 y mide la duración de la estancia, los eventos perdidos en cada punto de predicción candidato y el momento del primer valor de laboratorio, el ingreso a UCI, el registro en urgencias y los procedimientos de parto, en eventos y no eventos. Cierra D6 a D8. Se ejecuta igual; Q-E3b lee `labevents` y puede tardar unos minutos. El grupo F es un script aparte.
-
-Los cuatro scripts migrados de abajo todavía parten de la tabla materna antigua `cohort_smm_dataset`; el plan de análisis (sección 6) los reemplaza por scripts sobre la cohorte revisada. Su orden, si los ejecutas tal como están, cada uno como script completo en una sola conexión (DBeaver: Alt+X), después de construir las tablas previas del proyecto materno:
-
-| Orden | Script | Qué hace |
-|---|---|---|
-| 1 | `sql/perinatal_feasibility_es.sql` | Cuenta las admisiones que tienen un código de muerte fetal (solo lee; tablas temporales) |
-| 2 | `sql/fetal_death_dataset_es.sql` | Construye `mimiciv.fetal_death_code_patterns` y `mimiciv.cohort_fetal_death_dataset` (desenlace estricto/parcial, versión de ICD, semanas de gestación) |
-| 3 | `sql/perinatal_feature_discovery_es.sql` | Explora qué predictores adicionales existen, con qué frecuencia y si difieren según el desenlace (solo lee) |
-| 4 | `sql/fetal_death_features_es.sql` | Construye `mimiciv.cohort_fetal_death_dataset_ext` (antecedentes, hemograma y panel de las primeras 24 h, mediciones ambulatorias) |
-
-Los scripts 1 y 3 solo leen datos y no son necesarios para construir las tablas; el 2 debe ir antes del 3 y del 4. Los scripts sin sufijo son los originales en inglés y los `_es` tienen el mismo código.
-
-Cada script SQL debe tener una versión en español con el mismo nombre más el sufijo `_es` (por ejemplo `fetal_death_dataset.sql` y `fetal_death_dataset_es.sql`). Las sentencias son idénticas; solo se traducen los comentarios. El script sin sufijo es el original (en inglés). Se comprueba con:
-
-```powershell
-python scripts/check_sql_pair.py sql
-```
-
-## Requisitos previos
-
-Este proyecto lee tablas que construye el proyecto hermano **MaternalMortality_MIMIC-IV** en la misma base de datos: `mimiciv.cohort_smm_dataset` y `mimiciv.pregnancy_diagnoses_expanded` (sus scripts `sql/01` a `sql/03`). Constrúyelas primero siguiendo el README de ese proyecto. No ejecutes dos contenedores de PostgreSQL sobre el mismo directorio de datos: si el contenedor del proyecto materno ya está corriendo, conéctate a ese y no levantes el `docker-compose.yml` de este proyecto.
-
-## Instalación y ejecución
-
-1. **Obtén acceso con credenciales a MIMIC-IV** (ver [Acceso a los datos](#acceso-a-los-datos)) y cárgalo localmente como se explica en el proyecto materno.
-2. **Configura tus credenciales:** copia `.env.example` a `.env` en la raíz del proyecto y completa la contraseña de tu base de datos local (los mismos valores del proyecto materno). `.env` está en `.gitignore` y nunca debe subirse.
-3. **Abre el proyecto en VS Code:** `Archivo > Abrir área de trabajo desde archivo...` y elige `PerinatalMortality_MIMIC-IV.code-workspace`. VS Code sugerirá las extensiones recomendadas.
-4. **Crea un entorno e instala las dependencias:**
-   ```powershell
-   cd PerinatalMortality_MIMIC-IV
-   python -m venv .venv
-   .venv\Scripts\activate          # macOS/Linux: source .venv/bin/activate
-   pip install -r requirements.txt
-   ```
-   Selecciona `.venv` como intérprete y como kernel de Jupyter.
-5. **Sigue el plan de análisis.** Los cuatro scripts migrados y el notebook exploratorio son el material de partida: el plan los reemplaza paso a paso (etiquetas, auditoría de conteos y predictores sobre la cohorte materna revisada). No los uses como pipeline final; sigue el orden de tareas del Excel de seguimiento.
+Cada script SQL tiene una versión en español con el sufijo `_es` y el mismo código (`python scripts/check_sql_pair.py sql`).
 
 ## Acceso a los datos
 
-Este repositorio **no** incluye datos a nivel de paciente. Todos los análisis usan la base **MIMIC-IV**, disponible en [PhysioNet](https://physionet.org/content/mimiciv/) con acceso por credenciales. Para reproducir este trabajo debes:
-
-1. Completar el curso CITI "Data or Specimens Only Research".
-2. Firmar el acuerdo de uso de datos de salud con credenciales de PhysioNet.
-3. Solicitar y obtener acceso a MIMIC-IV, y descargar tu propia copia.
+Este repositorio **no** incluye datos a nivel de paciente. MIMIC-IV está disponible en [PhysioNet](https://physionet.org/content/mimiciv/) para usuarios acreditados (curso CITI y acuerdo de uso de datos de PhysioNet). Solo se publican salidas agregadas; ningún `subject_id`, `hadm_id` ni fila a nivel de paciente, y los conteos de 1 a 4 se muestran como "<5".
 
 Referencia: Johnson, A.E.W. et al. *MIMIC-IV, a freely accessible electronic health record dataset.* Scientific Data **2023**, 10, 1. https://doi.org/10.1038/s41597-022-01899-x
 

@@ -1,0 +1,142 @@
+Notebook 05 (S5, S6, S7, G2), fetal death MIMIC-IV, antenatal prediction point; aggregate output only
+
+== S5 · Unit of analysis and grouping (7-day margin)
+   n_admissions  n_distinct_admissions  n_patients  n_patients_with_more_than_one  n_strict_events  n_patients_shared_between_train_and_test
+1         19440                  19440       13735                           4722              129                                         0
+
+== S5 · Unit of analysis
+                                review                          result                                 decision
+1                               record  19,440 rows, one per admission  one record per delivery hospitalization
+2  grouping of the 5 splits of gate G3        0 patients on both sides           every split grouped by patient
+
+== Q-P1 integrity
+   buffer_days  n_rows  n_admissions  n_patients  n_strict_events  n_with_any_prior_information
+1            1   19440         19440       13735              129                         17285
+2            7   19440         19440       13735              129                         17166
+3           30   19440         19440       13735              129                         16919
+
+== S6 · Prediction point
+                     review                              result                                                                    decision
+1          prediction point                      admission time  information recorded at least 7 days before (1 and 30 days as sensitivity)
+2         current pregnancy  measurements and laboratory values                            only between 280 and 7 days before the admission
+3  margins 1, 7 and 30 days          population and events kept                                                                    on to S7
+
+== Q-P2 categorical and binary predictors (7 days)
+                          predictor                    category  n_admissions   pct
+1                     01 race_group                       Asian          1795   9.2
+2                     01 race_group                       Black          4459  22.9
+3                     01 race_group                    Hispanic          1876   9.7
+4                     01 race_group            Other or unknown          2595  13.3
+5                     01 race_group                       White          8715  44.8
+6                02 insurance_group                    Medicaid          6169  31.7
+7                02 insurance_group  Medicare, other or missing           640   3.3
+8                02 insurance_group                     Private         12631  65.0
+9                        03 english                       false          1594   8.2
+10                       03 english                        true         17846  91.8
+11                 04 marital_group                     Married         11664  60.0
+12                 04 marital_group                     Missing           385   2.0
+13                 04 marital_group                 Not married          7391  38.0
+14           05 any_prior_admission                       false         11015  56.7
+15           05 any_prior_admission                        true          8425  43.3
+16           06 prior_admission_90d                       false         17916  92.2
+17           06 prior_admission_90d                        true          1524   7.8
+18                   07 hx_cesarean                       false         17770  91.4
+19                   07 hx_cesarean                        true          1670   8.6
+20     08 hx_hypertensive_pregnancy                       false         18451  94.9
+21     08 hx_hypertensive_pregnancy                        true           989   5.1
+22       09 hx_chronic_hypertension                       false         18968  97.6
+23       09 hx_chronic_hypertension                        true           472   2.4
+24    10 hx_pregestational_diabetes                       false         19173  98.6
+25    10 hx_pregestational_diabetes                        true           267   1.4
+26       11 hx_gestational_diabetes                       false         19022  97.8
+27       11 hx_gestational_diabetes                        true           418   2.2
+28              12 hx_substance_use                       false         18983  97.6
+29              12 hx_substance_use                        true           457   2.4
+30            13 hx_thyroid_disease                       false         18712  96.3
+31            13 hx_thyroid_disease                        true           728   3.7
+32  14 hx_adverse_pregnancy_outcome                       false         18981  97.6
+33  14 hx_adverse_pregnancy_outcome                        true           459   2.4
+34    15 hx_other_high_risk_chronic                       false         19297  99.3
+35    15 hx_other_high_risk_chronic                        true           143   0.7
+36               16 any_elevated_bp                       false         17431  89.7
+37               16 any_elevated_bp                        true          2009  10.3
+38        17 had_prenatal_care_here                       false          4486  23.1
+39        17 had_prenatal_care_here                        true         14954  76.9
+40           18 hx_hypertension_any                       false         18092  93.1
+41           18 hx_hypertension_any                        true          1348   6.9
+42               19 hx_diabetes_any                       false         18771  96.6
+43               19 hx_diabetes_any                        true           669   3.4
+
+== Q-P3 continuous predictors (7 days)
+           predictor  n_with_value  pct_with_value   p05    p25  median    p75    p95
+1              1 age         19440           100.0  22.0   29.0    33.0   36.0   41.0
+2         2 last_sbp         11916            61.3  98.0  108.0   116.0  122.0  136.0
+3         3 last_dbp         11916            61.3  58.0   64.0    70.0   78.0   86.0
+4         4 last_bmi          8304            42.7  22.7   27.0    30.5   35.1   44.2
+5  5 last_hemoglobin         11435            58.8   9.6   10.8    11.5   12.2   13.3
+
+== Q-P4 body mass index source (7 days)
+   n_recorded  n_computed_from_weight_and_height  n_missing
+1        8282                                 22      11136
+
+== S7 · Candidate parameters by block
+                                        block                                                                                                                                                                                       parameters of the design matrix n_parameters
+1                                registration                                                            age, race_Black, race_Hispanic, race_Asian, race_Other or unknown, ins_Medicaid, ins_Medicare_other_missing, english, marital_Not_married, marital_Missing           10
+2                             history of care                                                                                                                                                                              any_prior_admission, prior_admission_90d           <5
+3            conditions in earlier admissions  hx_cesarean, hx_hypertensive_pregnancy, hx_chronic_hypertension, hx_pregestational_diabetes, hx_gestational_diabetes, hx_substance_use, hx_thyroid_disease, hx_adverse_pregnancy_outcome, hx_other_high_risk_chronic            9
+4  current pregnancy, outpatient measurements                                                                                                                                                                         last_sbp, last_dbp, any_elevated_bp, last_bmi           <5
+5               current pregnancy, laboratory                                                                                                                                                                                                       last_hemoglobin           <5
+6                                   indicator                                                                                                                                                                                                had_prenatal_care_here           <5
+
+== S7 · Missing values of the design matrix (whole population)
+                 n_missing  pct_missing
+parameter                              
+last_sbp              7524         38.7
+last_dbp              7524         38.7
+last_bmi             11136         57.3
+last_hemoglobin       8005         41.2
+
+== S7 · Reduced set fixed before any model (used only if gate G3 failed with the 27 parameters)
+                                                           predictor
+1                                                                age
+2                                  race and ethnicity (4 parameters)
+3                                                           Medicaid
+4                                                            English
+5                                                            married
+6                                 had prenatal care in this hospital
+7                                             last systolic pressure
+8                                 elevated pressure (140/90 or more)
+9                                                    body mass index
+10                                                        hemoglobin
+11         hypertensive history (chronic or in an earlier pregnancy)
+12  diabetes (pregestational or gestational in an earlier pregnancy)
+13                           adverse outcome in an earlier pregnancy
+
+== S7 · Predictors
+                           review                                             result                                             decision
+1            candidate parameters                                                 27                               as in the outcome card
+2  events per candidate parameter                                                4.8  below 20: main model, penalized logistic regression
+3                  missing values  only in the measurements of the current pregnancy       multiple imputation inside each training split
+4                     reduced set                                      17 parameters                  fixed before any model, for gate G3
+
+== G2 · Leakage checks
+                                                                                                                                  check                                                                result
+1  columns of the current admission in the predictor table or the design matrix (admission type or location, discharge, emergency, DRG)                                                                  none
+2                                                                   diagnoses, procedures or laboratory values of the current admission  none: the table only reads earlier admissions and outpatient records
+3                                                                                                 measurements of the current pregnancy                           between 280 and 7 days before the admission
+4                                                                                                patients on both sides of the 5 splits                                                                     0
+
+== G2 · Leakage gate
+                                                     review result                             decision
+1  information of the current admission or after the window   none  passes: on to gate G3 (notebook 06)
+
+== Notebook summary
+                                                                                     value
+indicator                                                                                 
+admissions / patients (7-day margin)                                       19,440 / 13,735
+strict events                                                                          129
+candidate parameters                                                                    27
+events per parameter                                                                   4.8
+missing: blood pressure / hemoglobin / body mass index               38.7% / 41.2% / 57.3%
+gate G2                                                                             passes
+next step                                               sample size gate (G3), notebook 06

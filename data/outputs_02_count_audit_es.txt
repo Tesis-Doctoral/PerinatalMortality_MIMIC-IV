@@ -1,0 +1,206 @@
+Notebook 02 (E4), muerte fetal MIMIC-IV (M3); solo salida agregada
+
+== Q-A1 Base
+   admisiones  pacientes  hospitalizaciones de parto  pacientes con parto  partos elegibles a 24 h  filas de predictors_24h_v2
+1       25736      15084                       19425                13729                    19383                       25736
+
+== Q-A2 Reconciliación con el conjunto de datos anterior
+   en ambas  solo en la cohorte revisada  solo en el conjunto anterior  eventos anteriores  eventos revisados  eventos en ambas  evento antes y no ahora  evento nuevo, no en el anterior
+1     25736                            0                             0                 154                154               154                        0                                0
+
+== Q-A3 Admisiones por paciente
+  admisiones por paciente  pacientes  admisiones
+1                       1       8291      8291.0
+2                       2       4418      8836.0
+3                       3       1558      4674.0
+4                       4        491      1964.0
+5                 5 o más        326      1971.0
+
+== Q-A3b Resumen
+   pacientes  pacientes con más de una  % con más de una  máximo de admisiones
+1      15084                      6793              45.0                    27
+
+== E4 · Decisión D1: base de datos
+       revisión                                                               resultado                                                                        decisión
+1  conteos base  25,736 admisiones; 15,084 pacientes; 19,425 hospitalizaciones de parto  tablas revisadas de la cohorte obstétrica (las mismas de la auditoría materna)
+
+== Q-B1 Eventos por nivel y versión de la CIE
+       era CIE admisiones  eventos estrictos o parciales  eventos estrictos eventos solo parciales  pacientes con evento
+1        ambas         <5                              0                  0                      0                     0
+2  solo CIE-10      11671                             86                 72                     14                    83
+3   solo CIE-9      14064                             68                 64                     <5                    65
+4          NaN      25736                            154                136                     18                   148
+
+== Q-B2 Eventos por alcance
+                                                      alcance  admisiones  eventos estrictos o parciales  eventos estrictos  eventos por 1.000 admisiones
+1                               Cualquier admisión obstétrica       25736                            154                136                          5.98
+2                         Hospitalización de parto (marca v2)       19425                            127                114                          6.54
+3                              No es hospitalización de parto        6311                             27                 22                          4.28
+4  Con un código obstétrico estructurado (cualquier posición)       25644                            154                136                          6.01
+5                          Sin código obstétrico estructurado          92                              0                  0                          0.00
+
+== Q-B3 Etiqueta frente a código de mortinato
+   evento estricto código de mortinato marca de parto v2      era CIE admisiones
+1               Sí                  Sí                Sí  solo CIE-10         60
+2               Sí                  Sí                Sí   solo CIE-9         49
+3               Sí                  Sí                No  solo CIE-10         10
+4               Sí                  Sí                No   solo CIE-9          5
+5               Sí                  No                Sí  solo CIE-10         <5
+6               Sí                  No                Sí   solo CIE-9         <5
+7               Sí                  No                No  solo CIE-10         <5
+8               Sí                  No                No   solo CIE-9          6
+9               No                  No                Sí  solo CIE-10          9
+10              No                  No                Sí   solo CIE-9         <5
+11              No                  No                No  solo CIE-10          5
+
+== Q-B3b Código de mortinato sin marca de parto
+  código de aborto  admisiones  eventos estrictos
+1               Sí          15                 15
+
+== Q-B4 Semanas de gestación de los eventos
+       era CIE         nivel       edad gestacional eventos
+1  solo CIE-10  solo parcial  1 menos de 22 semanas      <5
+2  solo CIE-10  solo parcial     3 28 semanas o más      11
+3  solo CIE-10      estricto  1 menos de 22 semanas      13
+4  solo CIE-10      estricto        2 22-27 semanas      19
+5  solo CIE-10      estricto     3 28 semanas o más      37
+6  solo CIE-10      estricto       4 sin código Z3A      <5
+7   solo CIE-9  solo parcial       4 sin código Z3A      <5
+8   solo CIE-9      estricto       4 sin código Z3A      64
+
+== Q-B4b Semanas según marca de parto y código de aborto
+         edad gestacional marca de parto v2 código de aborto eventos estrictos o parciales eventos estrictos
+1   1 menos de 20 semanas                No               Sí                             7                 6
+2   1 menos de 20 semanas                Sí               No                            <5                <5
+3         2 20-21 semanas                No               No                            <5                 0
+4         2 20-21 semanas                Sí               No                             5                <5
+5         3 22-27 semanas                No               No                            <5                <5
+6         3 22-27 semanas                No               Sí                            <5                <5
+7         3 22-27 semanas                Sí               No                            17                17
+8         4 28-36 semanas                No               No                            <5                 0
+9         4 28-36 semanas                No               Sí                            <5                <5
+10        4 28-36 semanas                Sí               No                            21                19
+11     5 37 semanas o más                Sí               No                            23                17
+
+== Q-B5 Posición del código de muerte fetal
+  posición más baja  eventos eventos sin otro código obstétrico
+1               1-4      118                                 <5
+2              5-10       30                                  0
+3           over 10        6                                  0
+
+== Q-B7 Coincidencia con morbilidad materna severa y muerte materna
+               nivel  eventos  con morbilidad materna severa  muerte materna en la misma admisión  en ambas
+1  todos los eventos      154                             15                                    0         0
+2       solo parcial       18                              0                                    0         0
+3           estricto      136                             15                                    0         0
+
+== Q-B8 Eventos con códigos de aborto o ectópico
+  código de aborto marca de parto v2  eventos estrictos o parciales eventos estrictos
+1               No                No                              7                <5
+2               No                Sí                            127               114
+3               Sí                No                             20                19
+
+== E4 · Decisiones D3 y D5
+                                                 revisión                                                                     resultado                                                                                           decisión
+1         códigos de mortinato sin marca de parto (Q-B3b)                            todos tienen un código de aborto, ectópico o molar                           D3: población = marca de parto o código de mortinato (19.440 admisiones)
+2  códigos estrictos fuera del universo obstétrico (Q-B6)                                                                       ninguno                                                                      el universo no pierde eventos
+3                             semanas de gestación (Q-B4)  solo en admisiones CIE-10; algunos eventos estrictos con menos de 22 semanas  D5: código estricto a cualquier edad gestacional; 22 y 28 semanas como sensibilidad (solo CIE-10)
+4            otros desenlaces en la misma admisión (Q-B7)          morbilidad materna severa en algunos eventos; ninguna muerte materna                                                            sin cambio: no son parte de la etiqueta
+
+== Q-C1 Admisiones con evento por paciente
+   admisiones con evento de la paciente pacientes  admisiones de estas pacientes
+1                                     1       143                          343.0
+2                                     2        <5                           12.0
+3                                     3        <5                            5.0
+
+== Q-C2 Intervalo con la admisión anterior
+  intervalo con la admisión anterior  admisiones eventos
+1  0 primera admisión de la paciente       15084      93
+2                 1 menos de 90 días        3649      21
+3                      2 90-179 días         595      <5
+4                     3 180-364 días         415      <5
+5                   4 365 días o más        5993      37
+
+== Q-C3 Intervalo con una admisión anterior con muerte fetal
+           intervalo con un evento anterior  admisiones eventos  no eventos
+1  0 sin admisión anterior con muerte fetal       25626     148       25478
+2                        1 menos de 90 días          17       5          12
+3                            3 180-364 días          15       0          15
+4                          4 365 días o más          78      <5          77
+
+== Q-C3b Admisiones con evento según su orden
+  orden de la admisión  eventos  eventos estrictos
+1     primera admisión       93                 86
+2   admisión posterior       61                 50
+
+== Q-C4 Eventos según la unidad de análisis
+                                                  unidad  unidades  unidades con evento  unidades con evento estricto  pacientes con evento
+1                        Admisión (cualquier obstétrica)     25736                  154                           136                   148
+2                               Hospitalización de parto     19425                  127                           114                   126
+3                          Primera admisión por paciente     15084                   93                            86                    93
+4   Cadena de embarazo, intervalo de 30 días como máximo     23257                  150                           135                   148
+5   Cadena de embarazo, intervalo de 90 días como máximo     22080                  149                           134                   148
+6  Cadena de embarazo, intervalo de 180 días como máximo     21485                  149                           134                   148
+
+== E4 · Decisión D4: unidad de análisis
+                                        revisión                resultado                                                decisión
+1  eventos que conserva solo la primera admisión  93 de 154 (40% perdido)     no se usa: un registro por hospitalización de parto
+2              pacientes con más de una admisión       frecuentes (Q-A3b)  toda partición de la validación se agrupa por paciente
+3       cadenas de embarazo de 30, 90 y 180 días    150, 149, 149 eventos     la cadena de 90 días es un análisis de sensibilidad
+
+== Q-D1 Eventos por versión de la CIE
+       era CIE  partos  eventos en partos  estrictos en partos  eventos fuera de partos  eventos por 1.000 partos
+1        ambas       0                  0                    0                        0                       NaN
+2  solo CIE-10    8883                 70                   61                       16                      7.88
+3   solo CIE-9   10542                 57                   53                       11                      5.41
+4          NaN   19425                127                  114                       27                      6.54
+
+== Q-D1b Eventos por grupo de año ancla
+  grupo de año ancla  partos  eventos en partos eventos fuera de partos  eventos por 1.000 partos
+1        2008 - 2010    8227                 43                       7                      5.23
+2        2011 - 2013    4338                 29                      <5                      6.69
+3        2014 - 2016    3577                 23                       9                      6.43
+4        2017 - 2019    2349                 20                       7                      8.51
+5        2020 - 2022     934                 12                      <5                     12.85
+
+== Q-D1c Año aproximado por versión de la CIE
+       era CIE admisiones  año p05  año mediano  año p95
+1        ambas         <5   2014.0       2014.0   2014.0
+2  solo CIE-10      11671   2014.0       2017.0   2021.0
+3   solo CIE-9      14064   2008.0       2011.0   2014.0
+
+== Q-D2 Semanas de gestación por versión de la CIE
+       era CIE  eventos  eventos con semanas  partos  partos con semanas
+1        ambas        0                    0       0                   0
+2  solo CIE-10       86                   83    8883                8844
+3   solo CIE-9       68                    0   10542                   0
+4          NaN      154                   83   19425                8844
+
+== Q-D3 Tasas por 1.000 partos
+                                                               definición  eventos  partos  tasa por 1.000 partos
+1  A. Código de mortinato de la marca de parto (Z37.1/.4/.7, V27.1/.4/.7)      109   19425                   5.61
+2                                    B. Etiqueta estricta de muerte fetal      114   19425                   5.87
+3                          C. Etiqueta estricta o parcial de muerte fetal      127   19425                   6.54
+4           D. Solo CIE-10, estricta, 28 semanas o más (mortinato tardío)       36    8883                   4.05
+
+== E4 · Prueba de tendencia de la tasa de eventos en partos (Cochran-Armitage)
+   grupos  primer grupo, por 1.000  último grupo, por 1.000     z       p
+1       5                     5.23                    12.85  2.71  0.0067
+
+== E4 · Era y codificación
+                      revisión                                   resultado                                                                               decisión
+1  tasa de eventos por período  de 5.2 a 12.8 por 1,000 partos (p = 0.007)  aplica el criterio C4; se espera deriva de la calibración; se reporta como limitación
+2  versión de la CIE y período                    casi confundidos (Q-D1c)                           ningún análisis de sensibilidad por versión puede separarlos
+3         semanas de gestación            solo en admisiones CIE-10 (Q-D2)                                         definiciones de 22 y 28 semanas solo en CIE-10
+
+== Resumen del notebook
+                                                                                                              valor
+indicador                                                                                                          
+admisiones obstétricas / pacientes                                                                  25,736 / 15,084
+hospitalizaciones de parto                                                                                   19,425
+eventos que conserva solo la primera admisión                                                             93 de 154
+tasa de eventos en partos, primer y último período                                           5.23 y 12.85 por 1,000
+prueba de tendencia, p                                                                                       0.0067
+decisiones resueltas                                        D1 base de datos, D3 población, D4 unidad, D5 desenlace
+sentencias del script que fallaron                                                                          ninguno
+paso siguiente                                      unidad de análisis (E5) y punto de predicción (E6), notebook 03

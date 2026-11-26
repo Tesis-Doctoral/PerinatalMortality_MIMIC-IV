@@ -1,0 +1,206 @@
+Notebook 02 (S4), fetal death MIMIC-IV (M3); aggregate output only
+
+== Q-A1 base
+   n_admissions  n_patients  n_delivery_hospitalizations  n_patients_with_delivery  n_deliveries_eligible_24h  n_rows_predictors_24h
+1         25736       15084                        19425                     13729                      19383                  25736
+
+== Q-A2 reconciliation with the legacy dataset
+   in_both  only_in_revised_cohort  only_in_legacy_dataset  legacy_events  revised_events  events_in_both  legacy_event_not_event_now  new_event_not_in_legacy
+1    25736                       0                       0            154             154             154                           0                        0
+
+== Q-A3 admissions per patient
+  admissions_per_patient  n_patients  n_admissions
+1                      1        8291        8291.0
+2                      2        4418        8836.0
+3                      3        1558        4674.0
+4                      4         491        1964.0
+5              5 or more         326        1971.0
+
+== Q-A3b summary
+   n_patients  n_patients_with_more_than_one  pct_more_than_one  max_admissions
+1       15084                           6793               45.0              27
+
+== S4 · Decision D1: database
+        review                                                                result                                                                       decision
+1  base counts  25,736 admissions; 15,084 patients; 19,425 delivery hospitalizations  revised tables of the obstetric cohort (the same as the maternal count audit)
+
+== Q-B1 events by tier and ICD version
+       icd_era n_admissions  n_events_strict_or_partial  n_events_strict n_events_partial_only  n_patients_with_event
+1         both           <5                           0                0                     0                      0
+2  ICD-10 only        11671                          86               72                    14                     83
+3   ICD-9 only        14064                          68               64                    <5                     65
+4          NaN        25736                         154              136                    18                    148
+
+== Q-B2 events by scope
+                                             scope  n_admissions  n_events_strict_or_partial  n_events_strict  events_per_1000_admissions
+1                          Any obstetric admission         25736                         154              136                        5.98
+2               Delivery hospitalization (v2 flag)         19425                         127              114                        6.54
+3                   Not a delivery hospitalization          6311                          27               22                        4.28
+4  With a structured obstetric code (any position)         25644                         154              136                        6.01
+5              Without a structured obstetric code            92                           0                0                        0.00
+
+== Q-B3 label vs has_stillbirth_code
+    fd_strict  has_stillbirth_code  is_delivery_v2      icd_era n_admissions
+1        True                 True            True  ICD-10 only           60
+2        True                 True            True   ICD-9 only           49
+3        True                 True           False  ICD-10 only           10
+4        True                 True           False   ICD-9 only            5
+5        True                False            True  ICD-10 only           <5
+6        True                False            True   ICD-9 only           <5
+7        True                False           False  ICD-10 only           <5
+8        True                False           False   ICD-9 only            6
+9       False                False            True  ICD-10 only            9
+10      False                False            True   ICD-9 only           <5
+11      False                False           False  ICD-10 only            5
+
+== Q-B3b stillbirth code without delivery flag
+   has_abortive_code  n_admissions  n_events_strict
+1               True            15               15
+
+== Q-B4 gestational weeks of events
+       icd_era          tier     gestational_age n_events
+1  ICD-10 only  partial only    1 under 22 weeks       <5
+2  ICD-10 only  partial only  3 28 weeks or more       11
+3  ICD-10 only        strict    1 under 22 weeks       13
+4  ICD-10 only        strict       2 22-27 weeks       19
+5  ICD-10 only        strict  3 28 weeks or more       37
+6  ICD-10 only        strict       4 no Z3A code       <5
+7   ICD-9 only  partial only       4 no Z3A code       <5
+8   ICD-9 only        strict       4 no Z3A code       64
+
+== Q-B4b weeks by delivery flag and abortive code
+       gestational_age  is_delivery_v2  has_abortive_code n_events_strict_or_partial n_events_strict
+1     1 under 20 weeks           False               True                          7               6
+2     1 under 20 weeks            True              False                         <5              <5
+3        2 20-21 weeks           False              False                         <5               0
+4        2 20-21 weeks            True              False                          5              <5
+5        3 22-27 weeks           False              False                         <5              <5
+6        3 22-27 weeks           False               True                         <5              <5
+7        3 22-27 weeks            True              False                         17              17
+8        4 28-36 weeks           False              False                         <5               0
+9        4 28-36 weeks           False               True                         <5              <5
+10       4 28-36 weeks            True              False                         21              19
+11  5 37 weeks or more            True              False                         23              17
+
+== Q-B5 position of the fetal-death code
+  lowest_position  n_events n_events_without_other_obstetric_code
+1             1-4       118                                    <5
+2            5-10        30                                     0
+3         over 10         6                                     0
+
+== Q-B7 overlap with SMM and maternal death
+           tier  n_events  n_with_smm  n_maternal_death_same_admission  n_both
+1    all events       154          15                                0       0
+2  partial only        18           0                                0       0
+3        strict       136          15                                0       0
+
+== Q-B8 events with abortive or ectopic codes
+   has_abortive_code  is_delivery_v2  n_events_strict_or_partial n_events_strict
+1              False           False                           7              <5
+2              False            True                         127             114
+3               True           False                          20              19
+
+== S4 · Decisions D3 and D5
+                                               review                                                        result                                                                              decision
+1  stillbirth codes without the delivery flag (Q-B3b)                  all carry an abortive, ectopic or molar code                 D3: population = delivery flag or stillbirth code (19,440 admissions)
+2  strict codes outside the obstetric universe (Q-B6)                                                          none                                                     the universe does not lose events
+3                            gestational weeks (Q-B4)  only in ICD-10 admissions; some strict events under 22 weeks  D5: strict code at any gestational age; 22 and 28 weeks as sensitivity (ICD-10 only)
+4         other outcomes in the same admission (Q-B7)   severe maternal morbidity in some events; no maternal death                                             no change: they are not part of the label
+
+== Q-C1 event admissions per patient
+   event_admissions_of_the_patient n_patients  n_admissions_of_these_patients
+1                                1        143                           343.0
+2                                2         <5                            12.0
+3                                3         <5                             5.0
+
+== Q-C2 gap to the previous admission
+          gap_to_previous_admission  n_admissions n_events
+1  0 first admission of the patient         15084       93
+2                   1 under 90 days          3649       21
+3                     2 90-179 days           595       <5
+4                    3 180-364 days           415       <5
+5                4 365 days or more          5993       37
+
+== Q-C3 gap to an earlier fetal-death admission
+                 gap_to_earlier_event  n_admissions n_events  n_non_events
+1  0 no earlier fetal-death admission         25626      148         25478
+2                     1 under 90 days            17        5            12
+3                      3 180-364 days            15        0            15
+4                  4 365 days or more            78       <5            77
+
+== Q-C3b event admissions by rank
+    admission_rank  n_events  n_events_strict
+1  first admission        93               86
+2  later admission        61               50
+
+== Q-C4 events by unit of analysis
+                                       unit  n_units  n_units_with_event  n_units_with_strict_event  n_patients_with_event
+1                 Admission (any obstetric)    25736                 154                        136                    148
+2                  Delivery hospitalization    19425                 127                        114                    126
+3               First admission per patient    15084                  93                         86                     93
+4   Pregnancy chain, gap of at most 30 days    23257                 150                        135                    148
+5   Pregnancy chain, gap of at most 90 days    22080                 149                        134                    148
+6  Pregnancy chain, gap of at most 180 days    21485                 149                        134                    148
+
+== S4 · Decision D4: unit of analysis
+                                    review                result                                           decision
+1  events kept by the first admission only  93 of 154 (40% lost)  not used: one record per delivery hospitalization
+2    patients with more than one admission      frequent (Q-A3b)       every validation split is grouped by patient
+3  pregnancy chains of 30, 90 and 180 days  150, 149, 149 events         the 90-day chain is a sensitivity analysis
+
+== Q-D1 events by ICD version
+       icd_era  n_deliveries  n_events_in_deliveries  n_strict_in_deliveries  n_events_not_deliveries  events_per_1000_deliveries
+1         both             0                       0                       0                        0                         NaN
+2  ICD-10 only          8883                      70                      61                       16                        7.88
+3   ICD-9 only         10542                      57                      53                       11                        5.41
+4          NaN         19425                     127                     114                       27                        6.54
+
+== Q-D1b events by anchor-year group
+  anchor_year_group  n_deliveries  n_events_in_deliveries n_events_not_deliveries  events_per_1000_deliveries
+1       2008 - 2010          8227                      43                       7                        5.23
+2       2011 - 2013          4338                      29                      <5                        6.69
+3       2014 - 2016          3577                      23                       9                        6.43
+4       2017 - 2019          2349                      20                       7                        8.51
+5       2020 - 2022           934                      12                      <5                       12.85
+
+== Q-D1c approximate year by ICD version
+       icd_era n_admissions  p05_year  median_year  p95_year
+1         both           <5    2014.0       2014.0    2014.0
+2  ICD-10 only        11671    2014.0       2017.0    2021.0
+3   ICD-9 only        14064    2008.0       2011.0    2014.0
+
+== Q-D2 gestational weeks by ICD version
+       icd_era  n_events  n_events_with_weeks  n_deliveries  n_deliveries_with_weeks
+1         both         0                    0             0                        0
+2  ICD-10 only        86                   83          8883                     8844
+3   ICD-9 only        68                    0         10542                        0
+4          NaN       154                   83         19425                     8844
+
+== Q-D3 rates per 1,000 deliveries
+                                                           definition  n_events  n_deliveries  rate_per_1000_deliveries
+1  A. Stillbirth code of the delivery flag (Z37.1/.4/.7, V27.1/.4/.7)       109         19425                      5.61
+2                                         B. Strict fetal-death label       114         19425                      5.87
+3                              C. Strict or partial fetal-death label       127         19425                      6.54
+4          D. ICD-10 only, strict, 28 weeks or more (late stillbirth)        36          8883                      4.05
+
+== S4 · Test for trend of the event rate in deliveries (Cochran-Armitage)
+   groups  first group, per 1,000  last group, per 1,000     z       p
+1       5                    5.23                  12.85  2.71  0.0067
+
+== S4 · Era and coding
+                   review                                             result                                                                       decision
+1    event rate by period  from 5.2 to 12.8 per 1,000 deliveries (p = 0.007)  criterion C4 applies; calibration drift is expected; reported as a limitation
+2  ICD version and period                          almost confounded (Q-D1c)                           no sensitivity analysis by version can separate them
+3       gestational weeks                   only in ICD-10 admissions (Q-D2)                                      22 and 28 week definitions only in ICD-10
+
+== Notebook summary
+                                                                                                        value
+indicator                                                                                                    
+obstetric admissions / patients                                                               25,736 / 15,084
+delivery hospitalizations                                                                              19,425
+events kept by the first admission only                                                             93 of 154
+event rate in deliveries, first and last period                                      5.23 and 12.85 per 1,000
+test for trend, p                                                                                      0.0067
+decisions settled                                             D1 database, D3 population, D4 unit, D5 outcome
+statements of the script that failed                                                                     none
+next step                                        unit of analysis (S5) and prediction point (S6), notebook 03
