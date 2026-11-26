@@ -37,6 +37,7 @@ Conteos de referencia que deben reproducirse (puerta P1): 25.736 admisiones obst
 | [`predictor_table_antenatal_es.md`](predictor_table_antenatal_es.md) | Verificación de la tabla de predictores prenatales |
 | [`docs/outcome_card_fetal_death_es.md`](docs/outcome_card_fetal_death_es.md) | Ficha del desenlace, punto de predicción al ingreso + 6 h |
 | [`docs/outcome_card_antenatal_es.md`](docs/outcome_card_antenatal_es.md) | Ficha del desenlace, retorno R3 (predicción prenatal) |
+| [`docs/tripod_ai_fetal_mimic_es.md`](docs/tripod_ai_fetal_mimic_es.md) | Lista TRIPOD+AI (reducida: análisis de factibilidad, sin modelo ajustado) |
 | [`analysis_plan_es.md`](analysis_plan_es.md) | Plan de análisis (decisiones D1 a D14) |
 | [StagedFramework_ClinicalPrediction](https://github.com/Tesis-Doctoral/StagedFramework_ClinicalPrediction/blob/main/README_es.md) | Framework por etapas aplicado (única versión vigente; sin copia local) |
 

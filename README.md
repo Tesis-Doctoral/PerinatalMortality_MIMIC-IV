@@ -37,6 +37,7 @@ Reference counts to be reproduced (gate G1): 25,736 obstetric admissions of 15,0
 | [`predictor_table_antenatal.md`](predictor_table_antenatal.md) | Check of the antenatal predictor table |
 | [`docs/outcome_card_fetal_death.md`](docs/outcome_card_fetal_death.md) | Outcome card, prediction point at admission + 6 h |
 | [`docs/outcome_card_antenatal.md`](docs/outcome_card_antenatal.md) | Outcome card, return R3 (antenatal prediction) |
+| [`docs/tripod_ai_fetal_mimic.md`](docs/tripod_ai_fetal_mimic.md) | TRIPOD+AI checklist (reduced: feasibility analysis, no model fitted) |
 | [`analysis_plan.md`](analysis_plan.md) | Analysis plan (decisions D1 to D14) |
 | [StagedFramework_ClinicalPrediction](https://github.com/Tesis-Doctoral/StagedFramework_ClinicalPrediction) | Staged framework applied (single current version; no local copy) |
 
