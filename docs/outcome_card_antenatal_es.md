@@ -75,7 +75,7 @@ Fijados el 18/11/2026 con las frecuencias de la auditoría de conteos (toda la p
 | C3, sesgo de detección | El desenlace no se define con un examen | No aplica |
 | C4, estabilidad en el tiempo | Desarrollo antes de 2017 y una sola prueba de 2017 en adelante | Aplica |
 
-**Dicho antes de los resultados.** Los modelos prenatales de mortinato basados en características maternas suelen alcanzar una AUROC de 0,60 a 0,75. El framework clasifica un modelo como predictor solo con AUROC de 0,75 o más, así que este modelo podría quedar como *ninguno* si queda por debajo. El umbral no se cambia para este desenlace; cualquier propuesta de cambio debe decidirse con el director antes de ajustar el primer modelo.
+**Dicho antes de los resultados.** Los modelos prenatales de mortinato basados en características maternas suelen alcanzar una AUROC de 0,60 a 0,75. El framework clasifica un modelo como predictor solo con AUROC de 0,75 o más, así que este modelo podría quedar como *señal insuficiente* si queda por debajo. El umbral no se cambia para este desenlace; cualquier propuesta de cambio debe decidirse con el director antes de ajustar el primer modelo.
 
 ## 7. Datos que usa
 
@@ -85,7 +85,7 @@ Tablas de MIMIC-IV `admissions`, `patients`, `diagnoses_icd`, `procedures_icd`, 
 
 1. ~~Auditoría de conteos A1~~ (hecha, [`../count_audit_antenatal_es.md`](../count_audit_antenatal_es.md)).
 2. ~~Tabla de predictores A2~~ (hecha el 19/11/2026, [`../predictor_table_antenatal_es.md`](../predictor_table_antenatal_es.md)). Faltantes: imputación múltiple (sección 5).
-3. ~~Puerta de tamaño de muestra P3~~ (20/11/2026): **no pasada**. R² de Cox-Snell observado con validación cruzada: −0,00054 (−0,7% del máximo); el conjunto reducido de 17 tampoco alcanzaría (mínimo 0,0124 para 27 parámetros y 0,0078 para 17). El desenlace se reporta como análisis de factibilidad.
+3. ~~Puerta de tamaño de muestra P3~~ (20/11/2026): **no pasada**. R² de Cox-Snell observado con validación cruzada: −0,00221 (−2,9% del máximo); el conjunto reducido de 17 tampoco alcanzaría (mínimo 0,0124 para 27 parámetros y 0,0078 para 17). El desenlace se reporta como análisis de factibilidad.
 4. Validación anidada agrupada, criterios C1, C2 y C4, clasificación.
 
 *Confidencial: uso interno del proyecto de investigación.*

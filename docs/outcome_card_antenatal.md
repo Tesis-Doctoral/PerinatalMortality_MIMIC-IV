@@ -75,7 +75,7 @@ Fixed on 2026-11-18 from the frequencies of the count audit (whole population, n
 | C3, detection bias | The outcome is not defined from a test | Not applicable |
 | C4, stability over time | Development before 2017, a single test from 2017 onward | Applicable |
 
-**Stated before the results.** Antenatal models of stillbirth built on maternal characteristics usually reach an AUROC of about 0.60 to 0.75. The framework classifies a model as a predictor only with an AUROC of 0.75 or more, so this model may be classified as *neither* if it falls below that. The threshold is not changed for this outcome; any proposal to change it must be decided with the supervisor before the first model is fitted.
+**Stated before the results.** Antenatal models of stillbirth built on maternal characteristics usually reach an AUROC of about 0.60 to 0.75. The framework classifies a model as a predictor only with an AUROC of 0.75 or more, so this model may be classified as *insufficient signal* if it falls below that. The threshold is not changed for this outcome; any proposal to change it must be decided with the supervisor before the first model is fitted.
 
 ## 7. Data used
 
@@ -85,7 +85,7 @@ MIMIC-IV tables `admissions`, `patients`, `diagnoses_icd`, `procedures_icd`, `om
 
 1. ~~Count audit A1~~ (done, [`../count_audit_antenatal.md`](../count_audit_antenatal.md)).
 2. ~~Predictor table A2~~ (done 2026-11-19, [`../predictor_table_antenatal.md`](../predictor_table_antenatal.md)). Missing values: multiple imputation (section 5).
-3. ~~Sample-size gate G3~~ (2026-11-20): **not passed**. Observed cross-validated Cox-Snell R²: −0.00054 (−0.7% of the maximum); the reduced set of 17 would not pass either (minimum 0.0124 for 27 parameters and 0.0078 for 17). The outcome is reported as a feasibility analysis.
+3. ~~Sample-size gate G3~~ (2026-11-20): **not passed**. Observed cross-validated Cox-Snell R²: −0.00221 (−2.9% of the maximum); the reduced set of 17 would not pass either (minimum 0.0124 for 27 parameters and 0.0078 for 17). The outcome is reported as a feasibility analysis.
 4. Nested grouped validation, criteria C1, C2 and C4, classification.
 
 *Confidential: internal use of the research project.*

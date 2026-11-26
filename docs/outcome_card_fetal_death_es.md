@@ -1,6 +1,6 @@
 # Ficha del desenlace — muerte perinatal antes del nacimiento (muerte fetal), MIMIC-IV
 
-Versión 1, 17/11/2026. Ficha de la segunda aplicación del framework por etapas ([StagedFramework_ClinicalPrediction](https://github.com/Tesis-Doctoral/StagedFramework_ClinicalPrediction/blob/main/README_es.md), versión 1.0). Llenada a partir de [`../analysis_plan_es.md`](../analysis_plan_es.md) (decisiones D1 a D14) y [`../count_audit_es.md`](../count_audit_es.md). Los campos marcados **pendiente** deben fijarse, y registrarse en el libro de decisiones, antes de la puerta que los necesita. Versión en inglés: [`outcome_card_fetal_death.md`](outcome_card_fetal_death.md).
+Versión 1, 17/11/2026. Ficha de la segunda aplicación del framework por etapas ([StagedFramework_ClinicalPrediction](https://github.com/Tesis-Doctoral/StagedFramework_ClinicalPrediction/blob/main/README_es.md)). Llenada a partir de [`../analysis_plan_es.md`](../analysis_plan_es.md) (decisiones D1 a D14) y [`../count_audit_es.md`](../count_audit_es.md). Los campos marcados **pendiente** deben fijarse, y registrarse en el libro de decisiones, antes de la puerta que los necesita. Versión en inglés: [`outcome_card_fetal_death.md`](outcome_card_fetal_death.md).
 
 ## 1. Identidad
 

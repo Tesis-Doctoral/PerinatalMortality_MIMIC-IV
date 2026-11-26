@@ -5,7 +5,7 @@
 ¿Se puede predecir la muerte fetal en las hospitalizaciones de parto de MIMIC-IV? El desenlace es la parte de la mortalidad perinatal que ocurre antes del nacimiento, identificada con los códigos CIE de la madre (MIMIC-IV no vincula a la madre con el recién nacido, así que no captura las muertes neonatales tempranas). Los notebooks siguen el framework etapa por etapa y puerta por puerta, en dos puntos de predicción:
 
 1. **Ingreso + 6 horas.** La auditoría de conteos encontró que 73 de las 129 muertes fetales (56,6%) ya estaban presentes en ese punto, así que la etapa E6 detuvo el modelo antes de ajustarlo: habría fallado el criterio C1.
-2. **Retorno R3: predicción prenatal.** Solo con la información registrada al menos 7 días antes del ingreso. El modelo es factible en los datos (99 de 129 eventos tienen información previa), pero la puerta de tamaño de muestra P3 no pasa: el R² de Cox-Snell con validación cruzada es negativo (−0,00054).
+2. **Retorno R3: predicción prenatal.** Solo con la información registrada al menos 7 días antes del ingreso. El modelo es factible en los datos (99 de 129 eventos tienen información previa), pero la puerta de tamaño de muestra P3 no pasa: el R² de Cox-Snell con validación cruzada es negativo (−0,00221).
 
 > **Estado: clasificado como análisis de factibilidad.** Con la información que MIMIC-IV registra antes del ingreso, la muerte fetal no puede predecirse. No se realizan las etapas E8 a E10 ni la puerta P4.
 

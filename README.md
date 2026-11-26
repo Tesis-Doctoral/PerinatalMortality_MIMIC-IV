@@ -5,7 +5,7 @@
 Can fetal death be predicted in the delivery hospitalizations of MIMIC-IV? The outcome is the part of perinatal mortality that happens before birth, identified with the mother's ICD codes (MIMIC-IV does not link mother and newborn, so early neonatal deaths are not captured). The notebooks follow the framework stage by stage and gate by gate, at two prediction points:
 
 1. **Admission + 6 hours.** The count audit found that 73 of the 129 fetal deaths (56.6%) were already present at that point, so stage S6 stopped the model before fitting it: it would have failed criterion C1.
-2. **Return R3: antenatal prediction.** Only with information recorded at least 7 days before the admission. The model is feasible in the data (99 of 129 events have earlier information), but the sample size gate G3 does not pass: the cross-validated Cox-Snell R² is negative (−0.00054).
+2. **Return R3: antenatal prediction.** Only with information recorded at least 7 days before the admission. The model is feasible in the data (99 of 129 events have earlier information), but the sample size gate G3 does not pass: the cross-validated Cox-Snell R² is negative (−0.00221).
 
 > **Status: classified as a feasibility analysis.** With the information MIMIC-IV records before the admission, fetal death cannot be predicted. Stages S8 to S10 and gate G4 are not carried out.
 
