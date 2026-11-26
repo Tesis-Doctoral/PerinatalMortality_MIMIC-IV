@@ -38,7 +38,7 @@ Conteos de referencia que deben reproducirse (puerta P1): 25.736 admisiones obst
 | [`docs/outcome_card_fetal_death_es.md`](docs/outcome_card_fetal_death_es.md) | Ficha del desenlace, punto de predicción al ingreso + 6 h |
 | [`docs/outcome_card_antenatal_es.md`](docs/outcome_card_antenatal_es.md) | Ficha del desenlace, retorno R3 (predicción prenatal) |
 | [`analysis_plan_es.md`](analysis_plan_es.md) | Plan de análisis (decisiones D1 a D14) |
-| [`framework_es.md`](framework_es.md) | Framework por etapas aplicado |
+| [StagedFramework_ClinicalPrediction](https://github.com/Tesis-Doctoral/StagedFramework_ClinicalPrediction/blob/main/README_es.md) | Framework por etapas aplicado (única versión vigente; sin copia local) |
 
 Cada documento tiene su versión en inglés con el mismo nombre sin `_es`.
 
@@ -67,7 +67,7 @@ libraries/                 database.py (conexión), sql_runner.py (corre los scr
                            antenatal_design.py (matriz de diseño de los 27 parámetros)
 scripts/check_sql_pair.py  Verifica que cada script SQL y su versión _es tengan el mismo código
 data/                      Solo salidas agregadas outputs_*.txt y las tablas de grupos *_groups.xlsx
-docs/                      Fichas del desenlace y figura del framework
+docs/                      Fichas del desenlace
 legacy/                    Material anterior al framework, solo como referencia
 ```
 

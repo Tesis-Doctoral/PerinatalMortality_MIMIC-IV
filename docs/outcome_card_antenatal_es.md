@@ -1,6 +1,6 @@
 # Ficha del desenlace — predicción prenatal de la muerte fetal, MIMIC-IV
 
-Ficha del desenlace del modelo prenatal, según el framework por etapas ([`../framework_es.md`](../framework_es.md)). Los campos marcados **pendiente** se fijan, y se registran en el libro de decisiones, antes de la puerta que los necesita. Versión en inglés: [`outcome_card_antenatal.md`](outcome_card_antenatal.md).
+Ficha del desenlace del modelo prenatal, según el framework por etapas ([StagedFramework_ClinicalPrediction](https://github.com/Tesis-Doctoral/StagedFramework_ClinicalPrediction/blob/main/README_es.md)). Los campos marcados **pendiente** se fijan, y se registran en el libro de decisiones, antes de la puerta que los necesita. Versión en inglés: [`outcome_card_antenatal.md`](outcome_card_antenatal.md).
 
 ## 1. La pregunta
 

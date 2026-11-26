@@ -1,6 +1,6 @@
 # Outcome card — perinatal death before birth (fetal death), MIMIC-IV
 
-Version 1, 2026-11-17. Card of the second application of the staged framework ([`../framework.md`](../framework.md), version 1.0). Filled from [`../analysis_plan.md`](../analysis_plan.md) (decisions D1 to D14) and [`../count_audit.md`](../count_audit.md). Fields marked **pending** must be fixed, and recorded in the decision log, before the gate that needs them. Spanish version: [`outcome_card_fetal_death_es.md`](outcome_card_fetal_death_es.md).
+Version 1, 2026-11-17. Card of the second application of the staged framework ([StagedFramework_ClinicalPrediction](https://github.com/Tesis-Doctoral/StagedFramework_ClinicalPrediction), version 1.0). Filled from [`../analysis_plan.md`](../analysis_plan.md) (decisions D1 to D14) and [`../count_audit.md`](../count_audit.md). Fields marked **pending** must be fixed, and recorded in the decision log, before the gate that needs them. Spanish version: [`outcome_card_fetal_death_es.md`](outcome_card_fetal_death_es.md).
 
 ## 1. Identity
 

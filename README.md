@@ -38,7 +38,7 @@ Reference counts to be reproduced (gate G1): 25,736 obstetric admissions of 15,0
 | [`docs/outcome_card_fetal_death.md`](docs/outcome_card_fetal_death.md) | Outcome card, prediction point at admission + 6 h |
 | [`docs/outcome_card_antenatal.md`](docs/outcome_card_antenatal.md) | Outcome card, return R3 (antenatal prediction) |
 | [`analysis_plan.md`](analysis_plan.md) | Analysis plan (decisions D1 to D14) |
-| [`framework.md`](framework.md) | Staged framework applied |
+| [StagedFramework_ClinicalPrediction](https://github.com/Tesis-Doctoral/StagedFramework_ClinicalPrediction) | Staged framework applied (single current version; no local copy) |
 
 Each document has a Spanish version with the same name plus `_es`.
 
@@ -67,7 +67,7 @@ libraries/                 database.py (connection), sql_runner.py (runs the scr
                            antenatal_design.py (design matrix of the 27 parameters)
 scripts/check_sql_pair.py  Checks that each SQL script and its _es version have the same code
 data/                      Only aggregate outputs outputs_*.txt and the group tables *_groups.xlsx
-docs/                      Outcome cards and framework figure
+docs/                      Outcome cards
 legacy/                    Material from before the framework, kept only as reference
 ```
 

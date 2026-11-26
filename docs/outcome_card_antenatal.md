@@ -1,6 +1,6 @@
 # Outcome card — antenatal prediction of fetal death, MIMIC-IV
 
-Outcome card of the antenatal model, following the staged framework ([`../framework.md`](../framework.md)). Fields marked **pending** are fixed, and recorded in the decision log, before the gate that needs them. Spanish version: [`outcome_card_antenatal_es.md`](outcome_card_antenatal_es.md).
+Outcome card of the antenatal model, following the staged framework ([StagedFramework_ClinicalPrediction](https://github.com/Tesis-Doctoral/StagedFramework_ClinicalPrediction)). Fields marked **pending** are fixed, and recorded in the decision log, before the gate that needs them. Spanish version: [`outcome_card_antenatal_es.md`](outcome_card_antenatal_es.md).
 
 ## 1. The question
 
